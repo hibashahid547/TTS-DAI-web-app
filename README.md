@@ -216,7 +216,7 @@ tts-speakers/
 │   ├── sad.wav
 │   └── angry.wav
 
-## 1.tts-generations
+### 2.tts-generations
 
 This bucket stores generated MP3 audio files.
 
