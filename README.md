@@ -246,7 +246,7 @@ The public URL returned by Supabase is used by the web interface to:
 Play the generated audio
 Download the generated audio
 
-## Supabase Database
+### Supabase Database
 
 TTS-DAI uses three PostgreSQL tables in Supabase:
 
