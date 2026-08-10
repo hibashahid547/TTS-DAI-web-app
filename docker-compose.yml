@@ -1,0 +1,18 @@
+services:
+  tts-api:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8965:8965"
+    environment:
+      - HF_HOME=/cache/huggingface
+      - TRANSFORMERS_CACHE=/cache/huggingface
+      - TORCH_HOME=/cache/torch
+    volumes:
+      - tts_model_cache:/cache
+      - ./voices:/app/voices
+    restart: unless-stopped
+
+volumes:
+  tts_model_cache:

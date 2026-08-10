@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="md:col-span-2">
+      <h1 class="text-3xl font-semibold tracking-tight">Marketing Voiceover Studio</h1>
+      <p class="mt-2 text-slate-300 leading-relaxed">
+        Create reference-based voices and generate human-like voiceovers with natural pacing.
+        Latency is not optimized; quality is prioritized.
+      </p>
+
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="/ui/tts" class="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-sm font-medium">Open TTS Studio</a>
+        <a href="/ui/speakers" class="px-4 py-2 rounded-xl border border-slate-800 hover:bg-slate-900 text-sm font-medium">Manage Speakers</a>
+      </div>
+
+      <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+          <div class="text-sm font-medium">Speakers Studio</div>
+          <div class="mt-2 text-sm text-slate-300">Upload MP3/WAV samples, normalize, and save curated brand voices.</div>
+          <div class="mt-4">
+            <a href="/ui/speakers" class="text-sm text-indigo-300 hover:text-indigo-200">Go to Speakers Studio →</a>
+          </div>
+        </div>
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+          <div class="text-sm font-medium">TTS Studio</div>
+          <div class="mt-2 text-sm text-slate-300">Generate MP3 voiceovers with punctuation-aware pauses and export instantly.</div>
+          <div class="mt-4">
+            <a href="/ui/tts" class="text-sm text-indigo-300 hover:text-indigo-200">Go to TTS Studio →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
+      <div class="text-sm font-medium">Quick Tips</div>
+      <div class="mt-3 space-y-3 text-sm text-slate-300">
+        <div>
+          <div class="font-medium text-slate-200">Reference clip</div>
+          <div>6–15s, dry studio recording, no music/echo. WAV preferred.</div>
+        </div>
+        <div>
+          <div class="font-medium text-slate-200">Script formatting</div>
+          <div>Use punctuation and line breaks. Shorter sentences sound more human.</div>
+        </div>
+        <div>
+          <div class="font-medium text-slate-200">Pacing</div>
+          <div>Use the pause controls to avoid “single-breath” output.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
