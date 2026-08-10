@@ -4,15 +4,111 @@ Production-style Text-to-Speech API for marketing voiceovers using **Chatterbox 
 
 ## Features
 
-- **POST `/tts`**: Send `text` + `voice` and get an **MP3** back
-- **Human-like pacing**: text is split into sentence-sized chunks and stitched with natural pauses (no “one-go” monotone dump)
-- **GET `/voices`**: discover available voices and their specialty/use-case
-- **CPU-only**: explicitly forces `device=cpu`
+### Speaker Profile Management
 
-## Requirements
+- Create speaker profiles with:
+  - Speaker name
+  - Description
+  - Emotion-specific reference audio
+- Upload multiple reference audio files for a single speaker.
+- Each uploaded audio file is associated with a specific emotion.
+- View all saved speakers through the Speaker Studio.
+- View the emotions available for each speaker.
+- Speaker and emotion information is persisted in Supabase.
 
-- Python 3.11 recommended
-- `ffmpeg` installed and available in `PATH` (required for MP3 export via pydub)
+### Emotion-Based Voice Generation
+
+- Select a saved speaker before generating speech.
+- Select an emotion associated with that speaker.
+- Use the corresponding emotion reference audio during Chatterbox TTS generation.
+- Supports multiple emotions per speaker, such as:
+  - `neutral`
+  - `happy`
+  - `sad`
+  - `angry`
+  - and other custom emotions stored in Supabase.
+
+### Multilingual Text-to-Speech
+
+- Supports multiple languages through the language selector.
+- Available languages include:
+  - English
+  - Arabic
+  - Danish
+  - German
+  - Greek
+  - Spanish
+  - Finnish
+  - French
+  - Hebrew
+  - Hindi
+  - Italian
+  - Japanese
+  - Korean
+  - Malay
+  - Dutch
+  - Norwegian
+  - Polish
+  - Portuguese
+  - Russian
+  - Swedish
+  - Swahili
+  - Turkish
+  - Chinese
+
+### Translation
+
+- Users can optionally translate their text before generating speech.
+- Translation is triggered from the TTS Studio UI.
+- The translated text is displayed in an editable text box.
+- Users can modify the translated text before generating audio.
+- Translation is performed through the `/ui/tts/translate` endpoint.
+- The translated text is sent directly to the TTS generation process, preventing duplicate translation.
+
+### Speech Generation
+
+- Generate speech using Chatterbox TTS.
+- Supports speaker and emotion selection.
+- Supports configurable speaking speed.
+- Text is processed in chunks for improved speech pacing.
+- Sentence, clause, and default pauses can be configured.
+- Generated audio is converted to MP3.
+- MP3 bitrate can be configured.
+
+### Audio Playback and Download
+
+- Generated audio is uploaded to Supabase Storage.
+- Generated audio can be played directly inside the browser.
+- Users can download generated audio as an MP3 file.
+- Each generation receives a unique generation ID.
+
+### Generation History
+
+- Generation records are stored in the Supabase `tts_generations` table.
+- Stored information includes:
+  - Speaker
+  - Emotion
+  - Input text
+  - Language
+  - Speaking speed
+  - Generated audio path
+  - Generation timestamp
+
+### Supabase Persistence
+
+The application uses Supabase for persistent storage of:
+
+- Speaker profiles
+- Speaker emotion reference files
+- Generated audio
+- Generation history
+
+The project uses the following Supabase database tables:
+
+```text
+speakers
+speaker_emotions
+tts_generations
 
 ### Install ffmpeg (Windows)
 
@@ -35,7 +131,7 @@ pip install -r requirements.txt
 ## Run
 
 ```powershell
-uvicorn main:app --host 0.0.0.0 --port 8965
+uvicorn main:app --host 127.0.0.1 --port 8965
 ```
 
 ## Run with Docker (recommended)
