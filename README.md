@@ -262,14 +262,6 @@ Public: Yes
 
 Generated files are stored using a unique generation ID.
 
-Example:
-
-tts-generations/
-│
-└── generations/
-    ├── <generation-uuid>.mp3
-    ├── <generation-uuid>.mp3
-    └── <generation-uuid>.mp3
 The application generates a unique UUID for every generated audio file.
 
 Example storage path:
@@ -289,7 +281,7 @@ speakers
 speaker_emotions
 tts_generations
 
-## 1. Speakers Table
+## 1. speakers Table
 
 The speakers table stores the main information about each speaker profile.
 
@@ -300,7 +292,7 @@ create table if not exists public.speakers (
     created_at timestamptz default now()
 );
 
-## 2. Speaker Emotions Table
+## 2. speaker_emotions Table
 
 The speaker_emotions table stores the emotion-specific reference audio associated with each speaker.
 
@@ -318,7 +310,7 @@ create table if not exists public.speaker_emotions (
 
     constraint unique_speaker_emotion unique (speaker_id, emotion)
 );
-## 3. TTS Generations Table
+## 3. tts_generations Table
 
 The tts_generations table stores information about every generated audio file.
 
@@ -493,24 +485,7 @@ Invoke-RestMethod `
 
 The translated text is displayed in the TTS Studio where the user can edit it before generating speech.
 
-## Speaker Management
 
-TTS-DAI uses speaker profiles instead of the previous voices.json voice registry.
-
-A speaker represents a complete voice profile and can contain multiple emotion-specific reference audio files.
-
-Example:
-
-Sarah
-│
-├── neutral.wav
-├── happy.wav
-├── sad.wav
-└── angry.wav
-
-Speaker information is stored in the Supabase speakers table.
-
-Emotion-specific reference audio information is stored in the speaker_emotions table.
 
 ## Speaker Data
 
@@ -722,45 +697,6 @@ Example:
     "storage_path": "generations/<uuid>.mp3",
     "public_url": "https://..."
 }
-## Web UI Routes
-
-TTS-DAI also provides server-rendered web pages.
-
-## Dashboard
-GET /ui
-
-Main application dashboard.
-
-## Speaker Studio
-GET /ui/speakers
-
-Used to:
-
-Create speaker profiles
-Add speaker information
-Upload emotion reference audio
-Manage speaker profiles
-
-## TTS Studio
-GET /ui/tts
-
-Used to:
-
-Enter text
-Select language
-Translate text
-Edit translated text
-Select speaker
-Select emotion
-Adjust speaking speed
-Generate speech
-Play generated audio
-Download generated MP3
-
-## Generation History
-GET /ui/history
-
-Displays previously generated audio and generation information stored in Supabase.
 
 ## API Summary
 Method	Endpoint	Purpose
