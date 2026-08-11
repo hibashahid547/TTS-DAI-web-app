@@ -1,8 +1,8 @@
 import io
-
 import logging
 import os
 import re
+import shutil
 import tempfile
 import uuid
 from datetime import datetime
@@ -20,10 +20,10 @@ from pydub.effects import normalize
 from deep_translator import GoogleTranslator
 from fastapi.templating import Jinja2Templates
 
-from chatterbox.tts import ChatterboxTTS
 from chatterbox.mtl_tts import ChatterboxMultilingualTTS
-from supabase import Client, create_client
 from dotenv import load_dotenv
+
+from persistence import ApiError, DataApi, StoreApi
 
 load_dotenv()
 
@@ -34,38 +34,71 @@ logging.basicConfig(
 logger = logging.getLogger("tts-dai")
 
 
+def _configure_ffmpeg() -> None:
+    """Ensure pydub can find ffmpeg/ffprobe even if the process PATH is stale."""
+    ffmpeg = (
+        os.getenv("FFMPEG_PATH", "").strip()
+        or shutil.which("ffmpeg")
+        or ""
+    )
+    ffprobe = (
+        os.getenv("FFPROBE_PATH", "").strip()
+        or shutil.which("ffprobe")
+        or ""
+    )
+
+    # Fall back to common WinGet install location if PATH wasn't refreshed.
+    if not ffmpeg or not ffprobe:
+        local = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
+        if local.is_dir():
+            for candidate in local.glob("Gyan.FFmpeg*/ffmpeg-*/bin"):
+                cand_ffmpeg = candidate / "ffmpeg.exe"
+                cand_ffprobe = candidate / "ffprobe.exe"
+                if cand_ffmpeg.is_file() and cand_ffprobe.is_file():
+                    ffmpeg = ffmpeg or str(cand_ffmpeg)
+                    ffprobe = ffprobe or str(cand_ffprobe)
+                    break
+
+    if ffmpeg:
+        bin_dir = str(Path(ffmpeg).resolve().parent)
+        path_parts = os.environ.get("PATH", "").split(os.pathsep)
+        if bin_dir not in path_parts:
+            os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
+        AudioSegment.converter = ffmpeg
+        logger.info("Using ffmpeg at %s", ffmpeg)
+    else:
+        logger.warning(
+            "ffmpeg not found. Install it or set FFMPEG_PATH. Audio upload/export will fail."
+        )
+
+    if ffprobe:
+        logger.info("Using ffprobe at %s", ffprobe)
+    else:
+        logger.warning(
+            "ffprobe not found. Install it or set FFPROBE_PATH. Audio upload will fail."
+        )
+
+
+_configure_ffmpeg()
+
+
 APP_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = APP_DIR / "templates"
 VOICES_DIR = APP_DIR / "voices"
 VOICE_CACHE_DIR = APP_DIR / os.getenv("VOICE_CACHE_DIR", "voices/cache")
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-SUPABASE_GENERATIONS_TABLE = os.getenv("SUPABASE_GENERATIONS_TABLE", "tts_generations")
-SUPABASE_SPEAKERS_TABLE = os.getenv(
-    "SUPABASE_SPEAKERS_TABLE",
-    "speakers"
-)
+DATA_API_URL = os.getenv("DATA_API_URL", "").strip()
+DATA_API_KEY = os.getenv("DATA_API_KEY", "").strip()
+STORE_API_URL = os.getenv("STORE_API_URL", "").strip()
+STORE_API_KEY = os.getenv("STORE_API_KEY", "").strip()
 
-SUPABASE_SPEAKER_EMOTIONS_TABLE = os.getenv(
-    "SUPABASE_SPEAKER_EMOTIONS_TABLE",
-    "speaker_emotions"
-)
+SPEAKERS_TABLE = os.getenv("SPEAKERS_TABLE", "speakers")
+SPEAKER_EMOTIONS_TABLE = os.getenv("SPEAKER_EMOTIONS_TABLE", "speaker_emotions")
+GENERATIONS_TABLE = os.getenv("GENERATIONS_TABLE", "tts_generations")
+SPEAKERS_BUCKET = os.getenv("SPEAKERS_BUCKET", "tts-speakers")
+GENERATIONS_BUCKET = os.getenv("GENERATIONS_BUCKET", "tts-generations")
 
-SUPABASE_GENERATIONS_TABLE = os.getenv(
-    "SUPABASE_GENERATIONS_TABLE",
-    "tts_generations"
-)
-
-SUPABASE_SPEAKERS_BUCKET = os.getenv(
-    "SUPABASE_SPEAKERS_BUCKET",
-    "tts_speakers"
-)
-
-SUPABASE_GENERATIONS_BUCKET = os.getenv(
-    "SUPABASE_GENERATIONS_BUCKET",
-    "tts_generations"
-)
+REF_AUDIO_MAX_SECONDS = float(os.getenv("REF_AUDIO_MAX_SECONDS", "300"))
 
 TTS_DEVICE = os.getenv("TTS_DEVICE", "cpu").strip().lower()
 SUPPORTED_LANGUAGES = {
@@ -159,69 +192,80 @@ app = FastAPI(
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
-_MODEL: Optional[ChatterboxTTS] = None
 _MTL_MODEL: Optional[ChatterboxMultilingualTTS] = None
 
 _SPEAKERS: List[Dict[str, Any]] = []
 
 _SPEAKER_EMOTIONS: List[Dict[str, Any]] = []
 
-_SUPABASE: Optional[Client] = None
-def _supabase_enabled() -> bool:
-    return bool(
-        SUPABASE_URL and
-        SUPABASE_SERVICE_ROLE_KEY
-    )
-def _get_supabase() -> Client:
-    if _SUPABASE is None:
+_DATA_API: Optional[DataApi] = None
+_STORE_API: Optional[StoreApi] = None
+
+
+def _data_api_enabled() -> bool:
+    return bool(DATA_API_URL and DATA_API_KEY)
+
+
+def _store_api_enabled() -> bool:
+    return bool(STORE_API_URL and STORE_API_KEY)
+
+
+def _persistence_enabled() -> bool:
+    return _data_api_enabled() and _store_api_enabled()
+
+
+def _get_data_api() -> DataApi:
+    if _DATA_API is None:
         raise HTTPException(
             status_code=500,
-            detail="Supabase client not initialized",
+            detail="Data API client not initialized",
         )
+    return _DATA_API
 
-    return _SUPABASE
-# # ==========================================================
+
+def _get_store_api() -> StoreApi:
+    if _STORE_API is None:
+        raise HTTPException(
+            status_code=500,
+            detail="Store API client not initialized",
+        )
+    return _STORE_API
+
+
+# ==========================================================
 # Speaker Helpers
 # ==========================================================
 
 def _load_speakers() -> List[Dict[str, Any]]:
-    """
-    Load all speakers from Supabase.
-    """
-
-    if not _supabase_enabled():
+    """Load all speakers from the Data API."""
+    if not _data_api_enabled():
         return []
 
-    sb = _get_supabase()
-
-    response = (
-        sb.table(SUPABASE_SPEAKERS_TABLE)
-        .select("*")
-        .order("name")
-        .execute()
-    )
-
-    return response.data or []
+    try:
+        return _get_data_api().select(
+            SPEAKERS_TABLE,
+            columns="*",
+            order="name.asc",
+        )
+    except ApiError as e:
+        logger.error("Failed to load speakers: %s %s", e, e.body)
+        return []
 
 
 def _load_speaker_emotions() -> List[Dict[str, Any]]:
-    """
-    Load all emotion audios.
-    """
-
-    if not _supabase_enabled():
+    """Load all emotion audios."""
+    if not _data_api_enabled():
         return []
 
-    sb = _get_supabase()
-
-    response = (
-        sb.table(SUPABASE_SPEAKER_EMOTIONS_TABLE)
-        .select("*")
-        .order("emotion")
-        .execute()
-    )
-
-    return response.data or []
+    try:
+        return _get_data_api().select(
+            SPEAKER_EMOTIONS_TABLE,
+            columns="*",
+            order="emotion.asc",
+        )
+    except ApiError as e:
+        logger.error("Failed to load speaker emotions: %s %s", e, e.body)
+        return []
 
 
 def _get_speaker(speaker_id: str) -> Optional[Dict[str, Any]]:
@@ -265,164 +309,102 @@ def _get_emotion_by_speaker(
     return None
 
 def _load_generations(limit: int = 50) -> List[Dict[str, Any]]:
-    """
-    Load recent TTS generations from Supabase.
-    """
-
-    if not _supabase_enabled():
+    """Load recent TTS generations from the Data API."""
+    if not _data_api_enabled():
         return []
 
-    sb = _get_supabase()
+    db = _get_data_api()
 
-    response = (
-        sb.table(SUPABASE_GENERATIONS_TABLE)
-        .select(
-            """
-            id,
-            created_at,
-            input_text,
-            language,
-            speed,
-            output_audio_path,
-            speakers(
-                name
+    try:
+        generations = db.select(
+            GENERATIONS_TABLE,
+            columns=(
+                "id,created_at,input_text,language,speed,output_audio_path,"
+                "speakers(name),speaker_emotions(emotion)"
             ),
-            speaker_emotions(
-                emotion
-            )
-            """
+            order="created_at.desc",
+            limit=limit,
         )
-        .order(
-            "created_at",
-            desc=True,
-        )
-        .limit(limit)
-        .execute()
-    )
+    except ApiError as e:
+        logger.error("Failed to load generations: %s %s", e, e.body)
+        return []
 
-    generations = response.data or []
+    store = _STORE_API
 
     for g in generations:
-
-        # ----------------------------
-        # Speaker Name
-        # ----------------------------
-
         speaker = g.get("speakers")
-
         if isinstance(speaker, dict):
             g["speaker_name"] = speaker.get("name")
         else:
             g["speaker_name"] = None
 
-        # ----------------------------
-        # Emotion
-        # ----------------------------
-
         emotion = g.get("speaker_emotions")
-
         if isinstance(emotion, dict):
             g["emotion"] = emotion.get("emotion")
         else:
             g["emotion"] = None
 
-        # ----------------------------
-        # Script
-        # ----------------------------
-
         g["text"] = g.get("input_text")
 
-        # ----------------------------
-        # Public Audio URL
-        # ----------------------------
-
         storage_path = g.get("output_audio_path")
-
-        if storage_path:
-
-            public_url = sb.storage.from_(
-                SUPABASE_GENERATIONS_BUCKET
-            ).get_public_url(storage_path)
-
-            if isinstance(public_url, dict):
-                g["public_url"] = (
-                    public_url.get("publicUrl")
-                    or public_url.get("publicURL")
-                    or public_url.get("url")
-                )
-            else:
-                g["public_url"] = str(public_url)
-
+        if storage_path and store is not None:
+            g["public_url"] = store.public_url(GENERATIONS_BUCKET, storage_path)
         else:
             g["public_url"] = ""
-                # ----------------------------
-        # Format Date
-        # ----------------------------
 
         created_at = g.get("created_at")
-
         if created_at:
-
             try:
-
-                dt = datetime.fromisoformat(
-                    created_at.replace("Z", "+00:00")
-                )
-
-                g["formatted_date"] = dt.strftime(
-                    "%d %b %Y • %I:%M %p"
-                )
-
+                dt = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                g["formatted_date"] = dt.strftime("%d %b %Y • %I:%M %p")
             except Exception:
-
                 g["formatted_date"] = created_at
-
         else:
-
             g["formatted_date"] = ""
 
     return generations
+
+
 def _upload_generated_mp3(*, mp3_bytes: bytes, storage_path: str) -> str:
-    if not _supabase_enabled():
+    if not _store_api_enabled():
         out_dir = (APP_DIR / "voices" / "generated").resolve()
         out_dir.mkdir(parents=True, exist_ok=True)
-        # storage_path is like generations/<id>.mp3
         local_path = out_dir / Path(storage_path).name
         local_path.write_bytes(mp3_bytes)
         return f"/ui/generated/{local_path.name}"
 
-    sb = _get_supabase()
+    store = _get_store_api()
     try:
-        sb.storage.from_(SUPABASE_GENERATIONS_BUCKET).upload(
-            file=mp3_bytes,
-            path=storage_path,
-            file_options={"content-type": "audio/mpeg", "upsert": "true"},
+        return store.upload(
+            GENERATIONS_BUCKET,
+            storage_path,
+            mp3_bytes,
+            content_type="audio/mpeg",
         )
-        public_url = sb.storage.from_(SUPABASE_GENERATIONS_BUCKET).get_public_url(storage_path)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Supabase upload failed: {e}")
-
-    if isinstance(public_url, dict):
-        url_val = public_url.get("publicUrl") or public_url.get("publicURL") or public_url.get("url")
-        return str(url_val) if url_val else ""
-    return str(public_url)
+    except ApiError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Store upload failed: {e} {e.body}",
+        ) from e
 
 
 @app.on_event("startup")
 def _startup() -> None:
-    global _MODEL, _MTL_MODEL, _SUPABASE, _SPEAKERS, _SPEAKER_EMOTIONS
+    global _MTL_MODEL, _DATA_API, _STORE_API, _SPEAKERS, _SPEAKER_EMOTIONS
 
     VOICES_DIR.mkdir(parents=True, exist_ok=True)
     VOICE_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Initialize Supabase
-    if _supabase_enabled():
-        _SUPABASE = create_client(
-            SUPABASE_URL,
-            SUPABASE_SERVICE_ROLE_KEY
-        )
+    if _data_api_enabled():
+        _DATA_API = DataApi(DATA_API_URL, DATA_API_KEY)
+    else:
+        logger.warning("DATA_API_URL / DATA_API_KEY not set; DB features disabled")
 
-    # Load speakers and emotion audios
+    if _store_api_enabled():
+        _STORE_API = StoreApi(STORE_API_URL, STORE_API_KEY)
+    else:
+        logger.warning("STORE_API_URL / STORE_API_KEY not set; storage upload disabled")
+
     _SPEAKERS = _load_speakers()
     _SPEAKER_EMOTIONS = _load_speaker_emotions()
 
@@ -456,19 +438,16 @@ def _startup() -> None:
         os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "0"
 
     logger.info(
-        "Loading ChatterboxTTS model (device=%s)...",
+        "Loading ChatterboxMultilingualTTS model (device=%s)...",
         device,
     )
 
-    _MODEL = ChatterboxTTS.from_pretrained(device=device)
+    _MTL_MODEL = ChatterboxMultilingualTTS.from_pretrained(device=device)
 
-    logger.info("ChatterboxTTS English model loaded successfully")
-
-    _MTL_MODEL = ChatterboxMultilingualTTS.from_pretrained(
-    device=device
+    logger.info(
+        "ChatterboxMultilingualTTS model loaded successfully (cuda_available=%s)",
+        torch.cuda.is_available(),
     )
-
-    logger.info("ChatterboxMultilingualTTS model loaded successfully")
 
 def _split_text_into_chunks(text: str, *, max_chars: int) -> List[str]:
     cleaned = re.sub(r"\s+", " ", text).strip()
@@ -661,44 +640,37 @@ def _generate_mp3_bytes(
     )
 
 def _download_reference_audio(emotion: Dict[str, Any]) -> str:
-    """
-    Downloads the selected emotion reference audio from Supabase
-    (only once) and returns the local cached path.
-    """
-
+    """Download emotion reference audio from Store API (cached locally)."""
     storage_path = emotion.get("storage_path")
 
     if not storage_path:
         raise HTTPException(
             status_code=400,
-            detail="Emotion has no reference audio."
+            detail="Emotion has no reference audio.",
         )
 
     cache_file = (
-    VOICE_CACHE_DIR /
-    storage_path.replace("/", "_")
-).resolve()
+        VOICE_CACHE_DIR / storage_path.replace("/", "_")
+    ).resolve()
 
     if cache_file.exists():
         return str(cache_file)
 
-    sb = _get_supabase()
-
-    try:
-        audio_bytes = (
-            sb.storage
-            .from_(SUPABASE_SPEAKERS_BUCKET)
-            .download(storage_path)
-        )
-
-    except Exception as e:
+    if not _store_api_enabled():
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to download reference audio: {e}"
+            detail="Store API is not configured",
         )
 
-    cache_file.write_bytes(audio_bytes)
+    try:
+        audio_bytes = _get_store_api().download(SPEAKERS_BUCKET, storage_path)
+    except ApiError as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to download reference audio: {e} {e.body}",
+        ) from e
 
+    cache_file.write_bytes(audio_bytes)
     return str(cache_file)
 
 def _wav_tensor_to_mp3_bytes(wav: torch.Tensor, sr: int, *, bitrate: str) -> bytes:
@@ -717,15 +689,21 @@ def _wav_tensor_to_mp3_bytes(wav: torch.Tensor, sr: int, *, bitrate: str) -> byt
 
 
 def _sanitize_voice_key(key: str) -> str:
+    """Normalize a label into a safe object-storage path segment."""
     k = key.strip()
     if not k:
         raise HTTPException(status_code=400, detail="Voice name is required")
-    if not re.fullmatch(r"[a-zA-Z0-9_-]{1,64}", k):
+
+    # Keep readable names (spaces, etc.) as storage-safe keys.
+    k = re.sub(r"\s+", "_", k)
+    k = re.sub(r"[^a-zA-Z0-9_-]+", "_", k)
+    k = re.sub(r"_+", "_", k).strip("_-")
+    if not k:
         raise HTTPException(
             status_code=400,
-            detail="Voice name must match [a-zA-Z0-9_-] and be <= 64 chars",
+            detail="Voice name must contain at least one letter or number",
         )
-    return k
+    return k[:64]
 
 
 async def _upload_speaker_emotion(
@@ -735,7 +713,7 @@ async def _upload_speaker_emotion(
 ) -> Dict[str, str]:
     """
     Clean, validate, and upload an emotion reference audio
-    to Supabase Storage.
+    to object storage.
     """
 
     data = await upload.read()
@@ -771,10 +749,13 @@ async def _upload_speaker_emotion(
             detail="Audio is too short. Please upload at least 1 second of speech.",
         )
 
-    if duration_seconds > 60.0:
+    if duration_seconds > REF_AUDIO_MAX_SECONDS:
         raise HTTPException(
             status_code=400,
-            detail="Audio is too long. Please keep the reference audio under 60 seconds.",
+            detail=(
+                f"Audio is too long ({duration_seconds:.1f}s). "
+                f"Please keep the reference audio under {REF_AUDIO_MAX_SECONDS:.0f} seconds."
+            ),
         )
 
     # --------------------------------------------------
@@ -846,13 +827,13 @@ async def _upload_speaker_emotion(
     wav_bytes = wav_buffer.getvalue()
 
     # --------------------------------------------------
-    # 8. Supabase configuration
+    # 8. Storage configuration
     # --------------------------------------------------
 
-    if not _supabase_enabled():
+    if not _store_api_enabled():
         raise HTTPException(
             status_code=500,
-            detail="Supabase is not configured",
+            detail="Store API is not configured",
         )
 
     safe_speaker = _sanitize_voice_key(speaker_name)
@@ -861,45 +842,22 @@ async def _upload_speaker_emotion(
     filename = f"{safe_speaker}_{safe_emotion}.wav"
     storage_path = f"{safe_speaker}/{filename}"
 
-    sb = _get_supabase()
-
     # --------------------------------------------------
     # 9. Upload cleaned reference audio
     # --------------------------------------------------
 
     try:
-        sb.storage.from_(SUPABASE_SPEAKERS_BUCKET).upload(
-            path=storage_path,
-            file=wav_bytes,
-            file_options={
-                "content-type": "audio/wav",
-                "upsert": "true",
-            },
+        public_url = _get_store_api().upload(
+            SPEAKERS_BUCKET,
+            storage_path,
+            wav_bytes,
+            content_type="audio/wav",
         )
-
-        public_url = sb.storage.from_(
-            SUPABASE_SPEAKERS_BUCKET
-        ).get_public_url(storage_path)
-
-    except Exception as e:
+    except ApiError as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Supabase upload failed: {e}",
-        )
-
-    # --------------------------------------------------
-    # 10. Extract public URL
-    # --------------------------------------------------
-
-    if isinstance(public_url, dict):
-        public_url = (
-            public_url.get("publicUrl")
-            or public_url.get("url")
-            or ""
-        )
-
-    elif hasattr(public_url, "public_url"):
-        public_url = public_url.public_url
+            detail=f"Store upload failed: {e} {e.body}",
+        ) from e
 
     logger.info(
         "Reference audio cleaned successfully | "
@@ -915,59 +873,48 @@ async def _upload_speaker_emotion(
         "storage_path": storage_path,
         "public_url": str(public_url),
     }
+
+
 def _create_or_get_speaker(
     name: str,
     description: str = "",
 ) -> Dict[str, Any]:
-
-    sb = _get_supabase()
+    db = _get_data_api()
     name = name.strip()
-    existing = (
-        sb.table(SUPABASE_SPEAKERS_TABLE)
-        .select("*")
-        .eq("name", name)
-        .execute()
+    existing = db.select(
+        SPEAKERS_TABLE,
+        columns="*",
+        filters={"name": f"eq.{name}"},
     )
 
-    if existing.data:
-        return existing.data[0]
+    if existing:
+        return existing[0]
 
-    response = (
-        sb.table(SUPABASE_SPEAKERS_TABLE)
-        .insert(
-            {
-                "name": name,
-                "description": description,
-            }
-        )
-        .execute()
+    return db.insert(
+        SPEAKERS_TABLE,
+        {
+            "name": name,
+            "description": description,
+        },
     )
 
-    return response.data[0]
+
 def _save_speaker_emotion(
     speaker_id: str,
     emotion: str,
     storage_path: str,
     public_url: str,
 ) -> Dict[str, Any]:
-
-    sb = _get_supabase()
-
-    response = (
-        sb.table(SUPABASE_SPEAKER_EMOTIONS_TABLE)
-        .upsert(
-            {
-                "speaker_id": speaker_id,
-                "emotion": emotion,
-                "storage_path": storage_path,
-                "public_url": public_url,
-            },
-            on_conflict="speaker_id,emotion",
-        )
-        .execute()
+    return _get_data_api().upsert(
+        SPEAKER_EMOTIONS_TABLE,
+        {
+            "speaker_id": speaker_id,
+            "emotion": emotion,
+            "storage_path": storage_path,
+            "public_url": public_url,
+        },
+        on_conflict="speaker_id,emotion",
     )
-
-    return response.data[0]
 
 def _refresh_speaker_cache():
 
@@ -1112,12 +1059,11 @@ async def ui_speakers_delete(
     )
     
 
-    if _supabase_enabled():
-        sb = _get_supabase()
+    if _persistence_enabled():
+        db = _get_data_api()
+        store = _get_store_api()
 
-        # Delete all emotion audio files
         emotion_paths = []
-
         for emotion in _SPEAKER_EMOTIONS:
             if emotion["speaker_id"] == speaker_id:
                 if emotion.get("storage_path"):
@@ -1125,21 +1071,18 @@ async def ui_speakers_delete(
 
         if emotion_paths:
             try:
-                sb.storage.from_(SUPABASE_SPEAKERS_BUCKET).remove(emotion_paths)
+                store.remove(SPEAKERS_BUCKET, emotion_paths)
             except Exception:
                 pass
-        # Delete emotion records from database
-        sb.table(
-            SUPABASE_SPEAKER_EMOTIONS_TABLE
-        ).delete().eq(
-            "speaker_id",
-            speaker_id,
-        ).execute()
-        # Delete speaker
-        sb.table(SUPABASE_SPEAKERS_TABLE)\
-            .delete()\
-            .eq("id", speaker_id)\
-            .execute()
+
+        db.delete(
+            SPEAKER_EMOTIONS_TABLE,
+            filters={"speaker_id": f"eq.{speaker_id}"},
+        )
+        db.delete(
+            SPEAKERS_TABLE,
+            filters={"id": f"eq.{speaker_id}"},
+        )
 
     # Reload cache
     _SPEAKERS = _load_speakers()
@@ -1179,25 +1122,24 @@ def _persist_generation(
     speed: float,
     output_audio_path: str,
 ) -> None:
-    """
-    Save a generation record to Supabase.
-    """
-
-    if not _supabase_enabled():
+    """Save a generation record via the Data API."""
+    if not _data_api_enabled():
         return
 
-    sb = _get_supabase()
-
-    sb.table(SUPABASE_GENERATIONS_TABLE).insert(
-        {
-            "speaker_id": speaker_id,
-            "emotion_id": emotion_id,
-            "input_text": input_text,
-            "language": language,
-            "speed": speed,
-            "output_audio_path":output_audio_path,
-        }
-    ).execute()
+    try:
+        _get_data_api().insert(
+            GENERATIONS_TABLE,
+            {
+                "speaker_id": speaker_id,
+                "emotion_id": emotion_id,
+                "input_text": input_text,
+                "language": language,
+                "speed": speed,
+                "output_audio_path": output_audio_path,
+            },
+        )
+    except ApiError as e:
+        logger.error("Failed to persist generation: %s %s", e, e.body)
 @app.post("/ui/tts/translate")
 async def ui_tts_translate(
     text: str = Form(...),

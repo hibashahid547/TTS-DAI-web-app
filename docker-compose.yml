@@ -4,14 +4,20 @@ services:
     env_file:
       - .env
     ports:
-      - "8965:8965"
+      - "${PORT:-8965}:8965"
     environment:
-      - HF_HOME=/cache/huggingface
-      - TRANSFORMERS_CACHE=/cache/huggingface
-      - TORCH_HOME=/cache/torch
+      TTS_DEVICE: ${TTS_DEVICE:-cuda}
+      PORT: ${PORT:-8965}
+      NVIDIA_VISIBLE_DEVICES: all
+      HF_HOME: /cache/huggingface
+      TRANSFORMERS_CACHE: /cache/huggingface
+      HUGGINGFACE_HUB_CACHE: /cache/huggingface
+      TORCH_HOME: /cache/torch
+      HF_HUB_DISABLE_PROGRESS_BARS: ${HF_HUB_DISABLE_PROGRESS_BARS:-0}
     volumes:
       - tts_model_cache:/cache
       - ./voices:/app/voices
+    gpus: all
     restart: unless-stopped
 
 volumes:

@@ -38,6 +38,8 @@ cache/
 
 # App-generated assets
 voices/cache/
+voices/generated/
+!voices/.gitkeep
 *.mp3
 *.wav
 
