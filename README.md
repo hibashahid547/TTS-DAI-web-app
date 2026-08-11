@@ -215,6 +215,7 @@ tts-speakers/
 │   ├── happy.wav
 │   ├── sad.wav
 │   └── angry.wav
+
 ### 2. 'tts-generations'
 
 This bucket stores generated MP3 audio files.
@@ -245,7 +246,7 @@ The public URL returned by Supabase is used by the web interface to:
 Play the generated audio
 Download the generated audio
 
-### Supabase Database
+### Supabase Database:
 
 TTS-DAI uses three PostgreSQL tables in Supabase:
 
