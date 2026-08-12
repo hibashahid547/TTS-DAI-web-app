@@ -98,11 +98,23 @@ Production-style Text-to-Speech API for marketing voiceovers using **Chatterbox 
 
 ## Prerequisites
 
+<<<<<<< HEAD
 - Python 3.12+
 - [ffmpeg](https://www.gyan.dev/ffmpeg/builds/) on your `PATH` (required by `pydub`)
 - PostgreSQL Data API URL + API key
 - Object Store API URL + API key
 - Storage buckets already created (defaults: `tts-speakers`, `tts-generations`, both public)
+=======
+- Speaker profiles
+- Speaker emotion reference files
+- Generated audio
+- Generation history
+
+The project uses the following Supabase database tables:
+speakers
+speaker_emotions
+tts_generations
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 ### Install ffmpeg (Windows)
 
@@ -231,6 +243,7 @@ uvicorn main:app --host 127.0.0.1 --port 8965
 
 First startup downloads Chatterbox model weights (can take several minutes).
 
+<<<<<<< HEAD
 ### 6. Open the UI
 
 | Page | URL |
@@ -275,9 +288,17 @@ copy .env.example .env
 # Edit .env: set DATA_API_URL, DATA_API_KEY, STORE_API_URL, STORE_API_KEY
 # Ensure TTS_DEVICE=cuda (default in .env.example)
 
-docker compose up --build
-```
+=======
+## Docker Compose
 
+Build and start the application using Docker Compose:
+
+</> powershell
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
+docker compose up --build
+Docker Compose uses the project's Docker configuration to build and run the TTS-DAI application.
+
+<<<<<<< HEAD
 First start downloads Chatterbox model weights into the `tts_model_cache` volume (can take several minutes). Later starts reuse the cache.
 
 Open:
@@ -305,14 +326,107 @@ docker run --rm --gpus all -p 8965:8965 `
 ```
 
 ### CPU-only Docker (no GPU)
+=======
+## Docker
+
+To build the Docker image manually:
+docker build -t tts-dai .
+
+Run the container:
+docker run --rm -p 8965:8965 --env-file .env tts-dai
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 Set in `.env`:
 
+<<<<<<< HEAD
 ```env
 TTS_DEVICE=cpu
 ```
 
 And remove or comment `gpus: all` in `docker-compose.yml` (or override with a local compose file). The image still includes CUDA torch; it will run on CPU if CUDA is unavailable.
+=======
+## Web UI
+
+TTS-DAI includes a server-rendered web interface built with **Jinja2** and **Tailwind CSS**.
+
+### Dashboard
+
+**URL:** http://localhost:8965/ui
+
+The dashboard provides access to the main TTS-DAI features.
+
+### Speaker Studio
+
+**URL:** http://localhost:8965/ui/speakers
+
+Speaker Studio is used to manage speaker profiles.
+
+Features include:
+
+- Create speaker profiles
+- Add speaker name and description
+- Upload multiple emotion-specific reference audio files
+- Associate each audio file with an emotion
+- View saved speaker profiles
+- View available emotions for each speaker
+- Store speaker and emotion information in Supabase
+
+Speaker reference audio is stored in the Supabase `tts_speakers` Storage bucket.
+
+### TTS Studio
+
+**URL:** http://localhost:8965/ui/tts
+
+TTS Studio is the main speech-generation interface.
+
+Features include:
+
+- Enter text for speech generation
+- Select a target language
+- Translate text before generation
+- Edit translated text
+- Select a speaker
+- Select an emotion
+- Adjust speaking speed
+- Configure speech pacing
+- Generate MP3 audio
+- Play generated audio in the browser
+- Download generated audio
+
+Generated audio is stored in the Supabase `tts_generations` Storage bucket.
+
+### Generation History
+
+**URL:** http://localhost:8965/ui/history
+
+The Generation History page displays previously generated speech and information stored in the `tts_generations` database table.
+
+It provides access to:
+
+- Speaker
+- Emotion
+- Input text
+- Language
+- Speaking speed
+- Generated audio
+- Generation timestamp
+
+## Supabase persistence (recommended for production)
+
+To avoid losing voices on redeploy and to share voices across servers, configure Supabase:
+
+# Supabase Configuration
+
+TTS-DAI uses Supabase for persistent storage of speaker profiles, emotion-specific reference audio, and generated audio history.
+
+Supabase is used for:
+
+- Speaker profile management
+- Emotion reference audio management
+- Generated audio storage
+- Generation history
+- Persistent data across deployments
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 ---
 
@@ -347,6 +461,7 @@ Recommended configuration:
 - Bucket name: `tts-speakers`
 - Public: Yes
 
+<<<<<<< HEAD
 Example layout:
 
 ```text
@@ -358,6 +473,11 @@ tts-speakers/
 │   ├── Sarah_sad.wav
 │   └── Sarah_angry.wav
 ```
+=======
+Reference audio files are organized by speaker and emotion.
+
+### 2. 'tts-generations'
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 ### Storage: `tts-generations`
 
@@ -368,6 +488,7 @@ Recommended configuration:
 - Bucket name: `tts-generations`
 - Public: Yes
 
+<<<<<<< HEAD
 Example:
 
 ```text
@@ -377,6 +498,9 @@ tts-generations/
     ├── <generation-uuid>.mp3
     └── <generation-uuid>.mp3
 ```
+=======
+The application generates a unique UUID for every generated audio file.
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 Example path:
 
@@ -386,6 +510,7 @@ generations/550e8400-e29b-41d4-a716-446655440000.mp3
 
 The public object URL is used by the web UI to play and download generated audio.
 
+<<<<<<< HEAD
 ### Database relationships
 
 ```text
@@ -401,26 +526,51 @@ speakers
 ```
 
 ### 1. Speakers table
+=======
+Play the generated audio
+Download the generated audio
+
+### Supabase Database:
+
+TTS-DAI uses three PostgreSQL tables in Supabase:
+
+speakers
+speaker_emotions
+tts_generations
+
+## 1. speakers Table
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 Stores the main information about each speaker profile.
 
 ```sql
 create table if not exists public.speakers (
     id uuid primary key default gen_random_uuid(),
+<<<<<<< HEAD
     name text not null,
     description text not null default '',
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
+=======
+    name text not null unique,
+    description text default '',
+    created_at timestamptz default now()
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 );
 ```
 
+<<<<<<< HEAD
 ### 2. Speaker emotions table
+=======
+## 2. speaker_emotions Table
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 Stores emotion-specific reference audio associated with each speaker.
 
 ```sql
 create table if not exists public.speaker_emotions (
     id uuid primary key default gen_random_uuid(),
+<<<<<<< HEAD
     speaker_id uuid not null
         references public.speakers(id)
         on delete cascade,
@@ -434,9 +584,25 @@ create table if not exists public.speaker_emotions (
 ```
 
 ### 3. TTS generations table
+=======
+
+    speaker_id uuid not null references public.speakers(id) on delete cascade,
+
+    emotion text not null,
+
+    storage_path text,
+    public_url text,
+
+    created_at timestamptz default now(),
+
+    constraint unique_speaker_emotion unique (speaker_id, emotion)
+);
+## 3. tts_generations Table
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 Stores information about every generated audio file.
 
+<<<<<<< HEAD
 ```sql
 create table if not exists public.tts_generations (
     id uuid primary key default gen_random_uuid(),
@@ -455,6 +621,74 @@ create table if not exists public.tts_generations (
 ```
 
 The canonical schema used by the app is in [`migrations/001_init.sql`](migrations/001_init.sql).
+=======
+CREATE TABLE tts_generations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    speaker_id UUID NOT NULL
+        REFERENCES speakers(id)
+        ON DELETE CASCADE,
+
+    emotion_id UUID NOT NULL
+        REFERENCES speaker_emotions(id)
+        ON DELETE CASCADE,
+
+    input_text TEXT NOT NULL,
+
+    language VARCHAR(50),
+
+    speed DECIMAL(3,2) DEFAULT 1.00,
+
+    output_audio_path TEXT NOT NULL,
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+### 3) Environment Variables
+
+TTS-DAI uses environment variables for server configuration and Supabase access.
+
+Create a `.env` file in the project root:
+
+env
+# Server
+PORT=8965
+
+# TTS Device
+TTS_DEVICE=cpu
+
+# Logging
+LOG_LEVEL=INFO
+
+# Hugging Face
+HF_HUB_DISABLE_PROGRESS_BARS=0
+
+# Supabase
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
+# Database Tables
+SUPABASE_SPEAKERS_TABLE=speakers
+SUPABASE_SPEAKER_EMOTIONS_TABLE=speaker_emotions
+SUPABASE_GENERATIONS_TABLE=tts_generations
+
+# Storage Buckets
+SUPABASE_SPEAKERS_BUCKET=tts_speakers
+SUPABASE_GENERATIONS_BUCKET=tts_generations
+
+# Local Cache
+VOICE_CACHE_DIR=voices/cache
+
+# API
+
+TTS-DAI provides REST API endpoints for:
+
+- Text-to-speech generation
+- Text translation
+- Speaker profile management
+- Emotion reference audio management
+- Generated audio retrieval
+- Server-rendered TTS Studio interface
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 ---
 
@@ -466,6 +700,7 @@ A speaker represents a complete voice profile and can contain multiple emotion-s
 
 Example:
 
+<<<<<<< HEAD
 ```text
 Sarah
 │
@@ -642,6 +877,9 @@ public_url
 `POST /ui/tts/generate`
 
 Accepts `multipart/form-data`.
+=======
+#### Request Parameters
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 | Parameter | Type | Required | Default | Description |
 |---|---|---:|---|---|
@@ -659,7 +897,7 @@ Accepts `multipart/form-data`.
 
 PowerShell example:
 
-```powershell
+powershell
 $form = @{
     text = "Welcome to our company. We provide innovative AI solutions."
     speaker = "Sarah"
@@ -672,7 +910,7 @@ $form = @{
     pause_default_ms = "160"
     mp3_bitrate = "192k"
     filename = "voiceover.mp3"
-}
+   }
 
 Invoke-RestMethod `
     -Uri "http://localhost:8965/ui/tts/generate" `
@@ -680,7 +918,13 @@ Invoke-RestMethod `
     -Form $form
 ```
 
+<<<<<<< HEAD
 Example response:
+=======
+### Response
+
+A successful request returns a JSON response similar to:
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 ```json
 {
@@ -708,7 +952,164 @@ Example response:
 
 ## Supported languages
 
+<<<<<<< HEAD
 The TTS Studio language selector includes:
+=======
+Translates text into the selected target language.
+
+The endpoint accepts multipart/form-data.
+$form = @{
+    text = "Hello, welcome to our company."
+    language = "French"
+}
+
+Invoke-RestMethod `
+    -Uri "http://localhost:8965/ui/tts/translate" `
+    -Method Post `
+    -Form $form
+
+### Response
+{
+    "translated_text": "Bonjour, bienvenue dans notre entreprise."
+}
+
+The translated text is displayed in the TTS Studio where the user can edit it before generating speech.
+
+
+
+## Speaker Data
+
+A speaker contains:
+
+Speaker
+├── id
+├── name
+├── description
+├── created_at
+└── updated_at
+
+Example:
+
+{
+    "id": "7f4c...",
+    "name": "Sarah",
+    "description": "Professional female marketing voice"
+}
+## Emotion-Based Reference Audio
+
+Each speaker can have multiple emotion reference audio files.
+
+For example:
+
+Sarah
+│
+├── neutral
+├── happy
+├── sad
+└── angry
+
+Each emotion is associated with a reference audio file stored in the Supabase tts-speakers bucket.
+
+The corresponding database record is stored in:
+
+speaker_emotions
+
+Example:
+
+{
+    "id": "9a12...",
+    "speaker_id": "7f4c...",
+    "emotion": "happy",
+    "audio_path": "speaker-id/happy.wav",
+    "public_url": "https://..."
+}
+## Speaker and Emotion Selection
+
+The TTS Studio dynamically loads available speakers from the database.
+
+When a speaker is selected:
+
+The frontend identifies the selected speaker.
+The available emotions for that speaker are loaded.
+The emotion dropdown is populated.
+Speaker information is displayed.
+The selected speaker and emotion are sent to the generation API.
+
+For example:
+
+Speaker:
+Sarah
+
+Available Emotions:
+[neutral] [happy] [sad] [angry]
+
+When the user selects:
+
+Speaker: Sarah
+Emotion: Happy
+
+## Generated Audio
+
+Every successful TTS generation receives a unique UUID.
+
+Example:
+
+550e8400-e29b-41d4-a716-446655440000
+
+The generated MP3 is uploaded to the Supabase Storage bucket:
+
+tts-generations
+
+with a storage path similar to:
+
+generations/550e8400-e29b-41d4-a716-446655440000.mp3
+
+The generation is also recorded in:
+
+tts_generations
+
+with information about:
+
+Speaker
+Emotion
+Input text
+Language
+Speed
+Generated audio path
+Generation timestamp
+
+## Translation + TTS Flow
+
+When translation is enabled:
+
+Original Text
+      │
+      ▼
+POST /ui/tts/translate
+      │
+      ▼
+Translated Text
+      │
+      ▼
+User edits translation
+      │
+      ▼
+POST /ui/tts/generate
+      │
+      ▼
+Chatterbox TTS
+      │
+      ▼
+Generated MP3
+
+The backend does not translate the text again after the frontend translation step.
+
+The edited translated text is sent directly to the TTS generation endpoint.
+
+## Supported Languages
+
+The TTS Studio provides a language selector containing:
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 ```text
 English
@@ -740,6 +1141,7 @@ Selected display names are mapped to language codes by the backend using `SUPPOR
 
 Example:
 
+<<<<<<< HEAD
 ```text
 English → en
 French  → fr
@@ -782,6 +1184,22 @@ Generated audio is exported as MP3.
 | `GET /ui/history` | Previously generated audio and metadata |
 
 ---
+=======
+{
+    "filename": "voiceover.mp3",
+    "storage_path": "generations/<uuid>.mp3",
+    "public_url": "https://..."
+}
+
+## API Summary
+Method	Endpoint	Purpose
+POST	/ui/tts/generate	Generate speech
+POST	/ui/tts/translate	Translate text
+GET	/ui	Dashboard
+GET	/ui/speakers	Speaker management UI
+GET	/ui/tts	TTS Studio
+GET	/ui/history	Generation history
+>>>>>>> 2380e97d5d0f05f892abe4318c67e942e2126fcc
 
 ## API summary
 
