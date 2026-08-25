@@ -19,10 +19,43 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <a href="/ui" class="font-semibold tracking-tight">TTS-DAI</a>
       <div class="flex items-center gap-2">
-        <a href="/ui/tts" class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 hover:bg-slate-900">TTS Studio</a>
-        <a href="/ui/history" class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 hover:bg-slate-900">History</a>
-        <a href="/ui/speakers" class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 hover:bg-slate-900">Speakers Studio</a>
-        <a href="/docs" class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 hover:bg-slate-900">API Docs</a>
+        <a
+          href="/ui/tts"
+          class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 hover:bg-slate-900"
+        >
+          TTS Studio
+        </a>
+
+        <a
+          href="/ui/history"
+          class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 hover:bg-slate-900"
+        >
+          History
+        </a>
+
+        <a
+          href="/ui/speakers"
+          class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 hover:bg-slate-900"
+        >
+          Speakers Studio
+        </a>
+
+        <a
+          href="/docs"
+          class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 hover:bg-slate-900"
+        >
+          API Docs
+        </a>
+
+        <!-- Sign Out -->
+        <form method="post" action="/logout" class="inline">
+          <button
+            type="submit"
+            class="px-3 py-1.5 rounded-lg text-sm border border-slate-800 text-slate-300 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-300"
+          >
+            Sign Out
+          </button>
+        </form>
       </div>
     </div>
   </div>

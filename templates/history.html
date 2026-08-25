@@ -2,215 +2,1335 @@
 
 {% block content %}
 
-<div class="flex flex-col gap-8">
+<style>
+/* =========================================================
+   HISTORY PAGE
+========================================================= */
 
-    <!-- ===================================================== -->
-    <!-- PAGE HEADER -->
-    <!-- ===================================================== -->
+.history-page {
+    min-height: calc(100vh - 80px);
+    padding-top: 0;
+    padding-bottom: 8px;
+}
 
-    <div class="flex items-center justify-between">
+
+/* =========================================================
+   GENERATION CARD
+========================================================= */
+
+.generation-card {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    padding: 10px;
+
+    border: 1px solid rgba(51, 65, 85, 0.62);
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(15, 23, 42, 0.86),
+            rgba(7, 15, 35, 0.94)
+        );
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.12);
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.generation-card:hover {
+    transform: translateY(-2px);
+
+    border-color: rgba(99, 102, 241, 0.38);
+
+    box-shadow:
+        0 16px 35px rgba(0, 0, 0, 0.20);
+}
+
+
+/* =========================================================
+   SPEAKER AVATAR
+========================================================= */
+
+.speaker-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    border: 1px solid rgba(129, 140, 248, 0.5);
+    background: rgba(79, 70, 229, 0.22);
+    color: #c7d2fe;
+}
+
+.speaker-avatar.avatar-pink {
+    border-color: rgba(236, 72, 153, 0.55);
+    background: rgba(190, 24, 93, 0.20);
+    color: #f9a8d4;
+}
+
+.speaker-avatar.avatar-green {
+    border-color: rgba(34, 197, 94, 0.55);
+    background: rgba(21, 128, 61, 0.22);
+    color: #86efac;
+}
+
+.speaker-avatar.avatar-blue {
+    border-color: rgba(59, 130, 246, 0.55);
+    background: rgba(37, 99, 235, 0.22);
+    color: #93c5fd;
+}
+
+.speaker-avatar.avatar-orange {
+    border-color: rgba(249, 115, 22, 0.55);
+    background: rgba(194, 65, 12, 0.22);
+    color: #fdba74;
+}
+
+.speaker-avatar.avatar-purple {
+    border-color: rgba(139, 92, 246, 0.55);
+    background: rgba(109, 40, 217, 0.22);
+    color: #c4b5fd;
+}
+
+
+/* =========================================================
+   EMOTION BADGES
+========================================================= */
+
+.emotion-badge {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 26px;
+    width: fit-content;
+
+    padding: 3px 8px;
+
+    border-radius: 7px;
+
+    font-size: 11px;
+    font-weight: 500;
+
+    border: 1px solid rgba(99, 102, 241, 0.40);
+    background: rgba(79, 70, 229, 0.10);
+    color: #a5b4fc;
+}
+
+.emotion-angry {
+    border-color: rgba(236, 72, 153, 0.38);
+    background: rgba(157, 23, 77, 0.09);
+    color: #f472b6;
+}
+
+.emotion-happy {
+    border-color: rgba(34, 197, 94, 0.38);
+    background: rgba(21, 128, 61, 0.09);
+    color: #4ade80;
+}
+
+.emotion-sad {
+    border-color: rgba(59, 130, 246, 0.38);
+    background: rgba(37, 99, 235, 0.09);
+    color: #60a5fa;
+}
+
+.emotion-excited {
+    border-color: rgba(249, 115, 22, 0.38);
+    background: rgba(194, 65, 12, 0.09);
+    color: #fb923c;
+}
+
+
+/* =========================================================
+   AUDIO PLAYER
+========================================================= */
+
+.audio-wrapper {
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+
+    border: 1px solid rgba(51, 65, 85, 0.78);
+    border-radius: 9px;
+
+    background: rgba(2, 6, 23, 0.22);
+
+    padding: 2px 5px;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.audio-wrapper:hover {
+    border-color: rgba(71, 85, 105, 0.95);
+    background: rgba(2, 6, 23, 0.30);
+}
+
+.history-audio {
+    width: 100%;
+    height: 30px;
+    display: block;
+}
+
+
+/* =========================================================
+   CARD BUTTONS
+========================================================= */
+
+.download-btn,
+.details-btn {
+    height: 32px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    border-radius: 8px;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+}
+
+.download-btn {
+    border: 1px solid rgba(51, 65, 85, 0.78);
+    background: rgba(2, 6, 23, 0.22);
+    color: #e2e8f0;
+}
+
+.download-btn:hover {
+    background: rgba(30, 41, 59, 0.70);
+    border-color: rgba(100, 116, 139, 0.65);
+}
+
+.details-btn {
+    border: 1px solid rgba(99, 102, 241, 0.30);
+
+    background:
+        linear-gradient(
+            135deg,
+            #4f24b8,
+            #5b21b6
+        );
+
+    color: white;
+
+    box-shadow:
+        0 5px 16px rgba(79, 70, 229, 0.13);
+}
+
+.details-btn:hover {
+    background:
+        linear-gradient(
+            135deg,
+            #5b21b6,
+            #6d28d9
+        );
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 7px 20px rgba(79, 70, 229, 0.20);
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+#generationDetailsModal {
+    animation: modalFadeIn 0.18s ease-out;
+}
+
+.generation-modal {
+    width: min(920px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+
+    overflow: hidden;
+
+    border: 1px solid rgba(51, 65, 85, 0.82);
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #080f23,
+            #020817
+        );
+
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(99, 102, 241, 0.04);
+}
+
+.modal-body {
+    overflow: hidden;
+}
+
+.modal-info-card {
+    min-width: 0;
+
+    border: 1px solid rgba(51, 65, 85, 0.65);
+    border-radius: 10px;
+
+    background: rgba(15, 23, 42, 0.38);
+
+    padding: 13px 15px;
+}
+
+.modal-label {
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.modal-value {
+    margin-top: 5px;
+
+    color: #f8fafc;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.modal-text-card {
+    height: 82px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(51, 65, 85, 0.65);
+    border-radius: 10px;
+
+    background: rgba(15, 23, 42, 0.38);
+
+    padding: 12px 14px;
+}
+
+.modal-text-content {
+    margin-top: 6px;
+
+    color: #cbd5e1;
+
+    font-size: 12px;
+    line-height: 1.45;
+
+    overflow: hidden;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+
+    word-break: break-word;
+}
+
+
+/* =========================================================
+   MODAL AUDIO
+========================================================= */
+
+.modal-audio-card {
+    border: 1px solid rgba(51, 65, 85, 0.65);
+    border-radius: 10px;
+
+    background: rgba(15, 23, 42, 0.38);
+
+    padding: 12px 14px;
+}
+
+.modal-output-card {
+    border-color: rgba(99, 102, 241, 0.25);
+
+    background: rgba(49, 46, 129, 0.07);
+}
+
+.modal-audio {
+    width: 100%;
+    height: 38px;
+    display: block;
+}
+
+
+/* =========================================================
+   DELETED REFERENCE
+========================================================= */
+
+.deleted-reference {
+    height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    border-radius: 8px;
+    border: 1px solid rgba(146, 64, 14, 0.40);
+    background: rgba(120, 53, 15, 0.09);
+    color: #fbbf24;
+    padding: 0 12px;
+    font-size: 11px;
+}
+
+.deleted-reference:not(.hidden) {
+    display: flex;
+}
+
+.deleted-reference.hidden {
+    display: none !important;
+}
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* =========================================================
+   DESKTOP VIEWPORT FIT
+========================================================= */
+
+@media (min-width: 1024px) {
+    .history-page {
+        min-height: calc(100vh - 80px);
+    }
+
+    .generation-card {
+        min-height: 0;
+    }
+}
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+
+    .generation-card {
+        min-height: 0;
+        padding: 14px;
+    }
+
+    .generation-modal {
+        width: calc(100vw - 20px);
+        max-height: calc(100vh - 20px);
+    }
+
+    .modal-text-card {
+        height: 72px;
+    }
+
+    .modal-audio-card {
+        padding: 10px;
+    }
+}
+/* =========================================================
+   COMPACT DESKTOP HISTORY
+========================================================= */
+
+@media (min-width: 1024px) {
+    .history-page {
+        min-height: calc(100vh - 80px);
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .generation-card {
+        min-height: 0;
+    }
+
+    .history-page > .grid {
+        align-items: stretch;
+    }
+}
+</style>
+
+
+<div class="history-page flex flex-col gap-2">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="flex items-end justify-between gap-6">
 
         <div>
-
-            <h1 class="text-3xl font-semibold tracking-tight">
+            <h1 class="text-3xl font-semibold tracking-tight text-white">
                 Generation History
             </h1>
 
-            <p class="mt-2 text-slate-400">
-                Browse all generated audios. Preview, download and review previous generations.
+            <p class="mt-0.5 text-sm text-slate-400">
+                Browse your generated audios and review previous generations.
             </p>
-
         </div>
 
-        <div class="text-right">
-
-            <div class="text-sm text-slate-400">
+        <div class="text-right shrink-0">
+            <div class="text-xs font-medium uppercase tracking-wider text-slate-500">
                 Total Generations
             </div>
 
-            <div class="text-3xl font-bold text-indigo-400">
+            <div class="text-xl font-semibold text-indigo-400">
                 {{ generations|length }}
             </div>
-
         </div>
 
     </div>
 
-    <!-- ===================================================== -->
-    <!-- HISTORY GRID -->
-    <!-- ===================================================== -->
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-      {% if generations %}
+    <!-- =====================================================
+         HISTORY GRID
+    ====================================================== -->
 
-    {% for g in generations %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 items-stretch">
 
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-4 hover:bg-slate-900/50 transition">
+        {% if generations %}
 
-        <!-- ====================================== -->
-        <!-- Header -->
-        <!-- ====================================== -->
+            {% for g in generations %}
 
-        <div class="flex items-start justify-between gap-4">
+                {% set speaker_name = g.speaker_name or "Unknown Speaker" %}
+                {% set emotion = g.emotion or "Neutral" %}
+                {% set emotion_lower = emotion|lower %}
 
-            <div>
+                {% if emotion_lower == "angry" %}
+                    {% set avatar_class = "avatar-pink" %}
+                    {% set emotion_class = "emotion-angry" %}
+                {% elif emotion_lower == "happy" %}
+                    {% set avatar_class = "avatar-blue" %}
+                    {% set emotion_class = "emotion-happy" %}
+                {% elif emotion_lower == "sad" %}
+                    {% set avatar_class = "avatar-blue" %}
+                    {% set emotion_class = "emotion-sad" %}
+                {% elif emotion_lower == "excited" %}
+                    {% set avatar_class = "avatar-orange" %}
+                    {% set emotion_class = "emotion-excited" %}
+                {% elif emotion_lower == "neutral" %}
+                    {% set avatar_class = "avatar-purple" %}
+                    {% set emotion_class = "" %}
+                {% else %}
+                    {% set avatar_class = "avatar-purple" %}
+                    {% set emotion_class = "" %}
+                {% endif %}
 
-                <div class="text-base font-semibold text-white">
 
-                    {{ g.speaker_name or g.speaker or "Unknown Speaker" }}
+                <!-- =================================================
+                     GENERATION CARD
+                ================================================== -->
+
+                <div class="generation-card">
+
+                    <!-- CARD HEADER -->
+
+                    <div class="flex items-center justify-between gap-3 min-h-[38px]">
+
+                        <div class="flex items-center gap-3 min-w-0">
+
+                            <div class="speaker-avatar {{ avatar_class }}">
+                                {{ speaker_name[0]|upper }}
+                            </div>
+
+                            <div class="min-w-0">
+
+                                <div class="text-base font-semibold text-white truncate">
+                                    {{ speaker_name }}
+                                </div>
+
+                                <div class="mt-1 text-xs text-slate-400 whitespace-nowrap">
+                                    {{ g.formatted_date }}
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <!-- EMOTION -->
+
+                    <div class="mt-1.5">
+
+                        <span class="emotion-badge {{ emotion_class }}">
+                            {{ emotion|capitalize }}
+                        </span>
+
+                    </div>
+
+
+                    <!-- AUDIO -->
+
+                    <div class="mt-1.5">
+
+                        <div class="mb-1.5 text-[11px] font-medium text-slate-500">
+                            Generated Audio
+                        </div>
+
+                        {% if g.public_url %}
+
+                            <div class="audio-wrapper">
+
+                                <audio
+                                    controls
+                                    preload="none"
+                                    class="history-audio"
+                                >
+                                    <source
+                                        src="{{ g.public_url }}"
+                                        type="audio/mpeg"
+                                    >
+
+                                    Your browser does not support audio playback.
+                                </audio>
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="audio-wrapper h-[44px] flex items-center px-3">
+                                <span class="text-xs text-slate-500">
+                                    Generated audio unavailable.
+                                </span>
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- ACTIONS -->
+
+                    <div class="mt-1.5 grid grid-cols-2 gap-2">
+
+                        {% if g.public_url %}
+
+                            <a
+                                href="{{ g.public_url }}"
+                                download
+                                class="download-btn"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="17"
+                                    height="17"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M12 3v12"></path>
+                                    <path d="m7 10 5 5 5-5"></path>
+                                    <path d="M5 21h14"></path>
+                                </svg>
+
+                                Download
+                            </a>
+
+                        {% else %}
+
+                            <div></div>
+
+                        {% endif %}
+
+
+                        <button
+                            type="button"
+                            class="view-details-btn details-btn"
+                            data-speaker="{{ g.speaker_name or 'Unknown Speaker' }}"
+                            data-emotion="{{ g.emotion or 'Neutral' }}"
+                            data-date="{{ g.formatted_date }}"
+                            data-input-text="{{ g.input_text or '' }}"
+                            data-translated-text="{{ g.translated_text or '' }}"
+                            data-output-url="{{ g.public_url or '' }}"
+                            data-reference-url="{{ g.reference_audio_url or '' }}"
+                            data-reference-deleted="{{ 'true' if g.reference_audio_deleted else 'false' }}"
+                            data-reference-path="{{ g.reference_audio_path or '' }}"
+                        >
+
+                            <!-- EYE ICON -->
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
+                                <circle cx="12" cy="12" r="2.5"></circle>
+                            </svg>
+
+                            View Details
+
+                        </button>
+
+                    </div>
 
                 </div>
 
-                <div class="mt-1 text-xs text-slate-400">
+            {% endfor %}
 
-                    {{ g.emotion or "Neutral" }}
+
+        {% else %}
+
+            <!-- =================================================
+                 EMPTY STATE
+            ================================================== -->
+
+            <div class="col-span-full">
+
+                <div class="rounded-2xl border border-dashed border-slate-700 bg-slate-900/20 p-12 text-center">
+
+                    <div class="text-6xl">
+                        🎙️
+                    </div>
+
+                    <h2 class="mt-5 text-xl font-semibold text-white">
+                        No History Yet
+                    </h2>
+
+                    <p class="mt-2 text-slate-400">
+                        Your generated audios will appear here once you create them.
+                    </p>
+
+                    <a
+                        href="/ui/tts"
+                        class="inline-flex mt-6 px-5 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 transition text-white"
+                    >
+                        Generate First Audio
+                    </a>
 
                 </div>
 
             </div>
 
-            <a
-                href="{{ g.public_url }}"
-                download
-                class="px-3 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-sm"
-            >
-                Download
-            </a>
-
-        </div>
-
-        <!-- ====================================== -->
-        <!-- Information -->
-        <!-- ====================================== -->
-
-        <div class="mt-5 space-y-2 text-sm">
-
-            <div class="flex justify-between">
-
-                <span class="text-slate-400">
-                    Speaker
-                </span>
-
-                <span>
-
-                    {{ g.speaker_name or g.speaker }}
-
-                </span>
-
-            </div>
-
-            <div class="flex justify-between">
-
-                <span class="text-slate-400">
-                    Emotion
-                </span>
-
-                <span>
-
-                    {{ g.emotion or "Neutral" }}
-
-                </span>
-
-            </div>
-
-            <div class="flex justify-between">
-
-                <span class="text-slate-400">
-                    Generated
-                </span>
-
-                <span class="text-right text-slate-300">
-
-                    {{ g.formatted_date }}
-
-                </span>
-
-            </div>
-
-        </div>
-
-        <!-- ====================================== -->
-        <!-- Script -->
-        <!-- ====================================== -->
-
-        <div class="mt-5">
-
-            <div class="text-xs text-slate-400 mb-2">
-
-                Script
-
-            </div>
-
-            <div
-                class="rounded-xl bg-slate-950 border border-slate-800 p-3 text-sm text-slate-300 max-h-20 overflow-auto"
-            >
-
-                {{ g.text or g.input_text }}
-
-            </div>
-
-        </div>
-
-        <!-- ====================================== -->
-        <!-- Audio -->
-        <!-- ====================================== -->
-
-        <div class="mt-5">
-
-            <audio controls class="w-full mt-3 h-8">
-
-                <source
-                    src="{{ g.public_url }}"
-                    type="audio/mpeg"
-                >
-
-            </audio>
-
-        </div>
+        {% endif %}
 
     </div>
 
-    {% endfor %}
+</div>
 
-{% else %}
-    <div class="col-span-full">
+
+
+<!-- =========================================================
+     GENERATION DETAILS MODAL
+========================================================= -->
+
+<div
+    id="generationDetailsModal"
+    class="fixed inset-0 z-50 hidden"
+    aria-hidden="true"
+>
+
+    <!-- BACKDROP -->
+
+    <div
+        id="generationModalBackdrop"
+        class="absolute inset-0 bg-black/75 backdrop-blur-md"
+    ></div>
+
+
+    <!-- MODAL POSITION -->
+
+    <div class="relative h-full w-full flex items-center justify-center p-4">
 
         <div
-            class="rounded-2xl border border-dashed border-slate-700 bg-slate-900/20 p-12 text-center"
+            id="generationModalContent"
+            class="generation-modal relative"
         >
 
-            <div class="text-6xl">
-                🎙️
+            <!-- =================================================
+                 MODAL HEADER
+            ================================================== -->
+
+            <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-800/80">
+
+                <div class="min-w-0">
+
+                    <h2 class="text-lg font-semibold text-white">
+                        Generation Details
+                    </h2>
+
+                    <p
+                        id="modalGeneratedDate"
+                        class="mt-0.5 text-xs text-slate-500"
+                    ></p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="closeGenerationModal"
+                    class="w-9 h-9 shrink-0 rounded-lg border border-slate-800 bg-slate-900/70 hover:bg-slate-800 text-slate-400 hover:text-white transition flex items-center justify-center"
+                    aria-label="Close"
+                >
+
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="17"
+                        height="17"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                    </svg>
+
+                </button>
+
             </div>
 
-            <h2 class="mt-5 text-xl font-semibold">
 
-                No History Yet
+            <!-- =================================================
+                 MODAL BODY
+            ================================================== -->
 
-            </h2>
+            <div class="modal-body p-5 space-y-3">
 
-            <p class="mt-2 text-slate-400">
 
-                Your generated audios will appear here once you create them.
+                <!-- =================================================
+                     SPEAKER + EMOTION
+                ================================================== -->
 
-            </p>
+                <div class="grid grid-cols-2 gap-3">
 
-            <a
-                href="/ui/tts"
-                class="inline-flex mt-6 px-5 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 transition"
-            >
+                    <div class="modal-info-card">
 
-                Generate First Audio
+                        <div class="modal-label">
+                            Speaker
+                        </div>
 
-            </a>
+                        <div
+                            id="modalSpeaker"
+                            class="modal-value"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="modal-info-card">
+
+                        <div class="modal-label">
+                            Emotion
+                        </div>
+
+                        <div
+                            id="modalEmotion"
+                            class="modal-value text-indigo-400 capitalize"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     INPUT + TRANSLATED TEXT
+                ================================================== -->
+
+                <div
+                    id="textDetailsRow"
+                    class="grid grid-cols-2 gap-3"
+                >
+
+                    <div class="modal-text-card">
+
+                        <div class="modal-label">
+                            Input Text
+                        </div>
+
+                        <div
+                            id="modalInputText"
+                            class="modal-text-content"
+                        ></div>
+
+                    </div>
+
+
+                    <div
+                        id="translatedTextSection"
+                        class="modal-text-card"
+                    >
+
+                        <div class="modal-label">
+                            Translated Text
+                        </div>
+
+                        <div
+                            id="modalTranslatedText"
+                            class="modal-text-content"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     REFERENCE + GENERATED AUDIO
+                ================================================== -->
+
+                <div class="grid grid-cols-2 gap-3">
+
+
+                    <!-- REFERENCE AUDIO -->
+
+                    <div class="modal-audio-card">
+
+                        <div class="modal-label mb-2">
+                            Reference Audio
+                        </div>
+
+
+                        <div id="referenceAudioContainer">
+                            <audio
+                                id="modalReferenceAudio"
+                                controls
+                                preload="none"
+                                class="modal-audio"
+                            ></audio>
+                        </div>
+
+                        <div
+                            id="referenceAudioDeleted"
+                            class="deleted-reference hidden"
+                        >
+                            Reference_audio not available
+                        </div>
+
+                    </div>
+
+
+                    <!-- GENERATED AUDIO -->
+
+                    <div class="modal-audio-card modal-output-card">
+
+                        <div class="modal-label mb-2">
+                            Generated Audio
+                        </div>
+
+                        <audio
+                            id="modalOutputAudio"
+                            controls
+                            preload="none"
+                            class="modal-audio"
+                        ></audio>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 MODAL FOOTER
+            ================================================== -->
+
+            <div class="flex justify-end px-5 py-3 border-t border-slate-800/80">
+
+                <button
+                    type="button"
+                    id="closeGenerationModalBottom"
+                    class="px-4 py-2 rounded-lg border border-slate-700 bg-slate-800/70 hover:bg-slate-700 text-sm text-slate-200 transition"
+                >
+                    Close
+                </button>
+
+            </div>
 
         </div>
 
     </div>
 
-{% endif %}
+</div>
 
-</div>
-</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    /* =========================================================
+       ELEMENTS
+    ========================================================= */
+
+    const modal =
+        document.getElementById(
+            "generationDetailsModal"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "generationModalBackdrop"
+        );
+
+    const closeButton =
+        document.getElementById(
+            "closeGenerationModal"
+        );
+
+    const closeBottomButton =
+        document.getElementById(
+            "closeGenerationModalBottom"
+        );
+
+    const modalSpeaker =
+        document.getElementById(
+            "modalSpeaker"
+        );
+
+    const modalEmotion =
+        document.getElementById(
+            "modalEmotion"
+        );
+
+    const modalGeneratedDate =
+        document.getElementById(
+            "modalGeneratedDate"
+        );
+
+    const modalInputText =
+        document.getElementById(
+            "modalInputText"
+        );
+
+    const modalTranslatedText =
+        document.getElementById(
+            "modalTranslatedText"
+        );
+
+    const translatedTextSection =
+        document.getElementById(
+            "translatedTextSection"
+        );
+
+    const modalReferenceAudio =
+        document.getElementById(
+            "modalReferenceAudio"
+        );
+
+    const referenceAudioContainer =
+        document.getElementById(
+            "referenceAudioContainer"
+        );
+
+    const referenceAudioDeleted =
+        document.getElementById(
+            "referenceAudioDeleted"
+        );
+
+    const modalOutputAudio =
+        document.getElementById(
+            "modalOutputAudio"
+        );
+
+
+    /* =========================================================
+       OPEN MODAL
+    ========================================================= */
+
+    function openModal(button) {
+
+        const speaker =
+            button.dataset.speaker ||
+            "Unknown Speaker";
+
+        const emotion =
+            button.dataset.emotion ||
+            "Neutral";
+
+        const date =
+            button.dataset.date ||
+            "";
+
+        const inputText =
+            button.dataset.inputText ||
+            "";
+
+        const translatedText =
+            button.dataset.translatedText ||
+            "";
+
+        const outputUrl =
+            button.dataset.outputUrl ||
+            "";
+
+        const referenceUrl =
+            button.dataset.referenceUrl ||
+            "";
+
+
+        /* -----------------------------------------------------
+           BASIC INFORMATION
+        ----------------------------------------------------- */
+
+        modalSpeaker.textContent =
+            speaker;
+
+        modalEmotion.textContent =
+            emotion;
+
+        modalGeneratedDate.textContent =
+            date;
+
+
+        /* -----------------------------------------------------
+           INPUT TEXT
+        ----------------------------------------------------- */
+
+        modalInputText.textContent =
+            inputText ||
+            "No input text available.";
+
+
+        /* -----------------------------------------------------
+           TRANSLATED TEXT
+        ----------------------------------------------------- */
+
+        if (translatedText.trim()) {
+
+            translatedTextSection.classList.remove(
+                "hidden"
+            );
+
+            modalTranslatedText.textContent =
+                translatedText;
+
+        } else {
+
+            translatedTextSection.classList.add(
+                "hidden"
+            );
+
+            modalTranslatedText.textContent =
+                "No translated text available.";
+
+        }
+
+
+        /* -----------------------------------------------------
+           REFERENCE AUDIO
+        ----------------------------------------------------- */
+
+        const referenceDeleted =
+            button.dataset.referenceDeleted === "true";
+
+        modalReferenceAudio.pause();
+        modalReferenceAudio.removeAttribute("src");
+        modalReferenceAudio.load();
+        const referencePath =
+            button.dataset.referencePath || "";
+
+        /*
+        * Reference audio is considered available only when:
+        * 1. It has not been deleted
+        * 2. A valid URL exists
+        */
+        if (!referenceDeleted && referenceUrl.trim()) {
+
+            referenceAudioDeleted.classList.add("hidden");
+            referenceAudioContainer.classList.remove("hidden");
+
+            modalReferenceAudio.src = referenceUrl;
+            modalReferenceAudio.load();
+
+        } else {
+
+            referenceAudioContainer.classList.add("hidden");
+            referenceAudioDeleted.classList.remove("hidden");
+        }
+
+        /* -----------------------------------------------------
+           GENERATED AUDIO
+        ----------------------------------------------------- */
+
+        modalOutputAudio.pause();
+
+        modalOutputAudio.removeAttribute(
+            "src"
+        );
+
+        modalOutputAudio.load();
+
+
+        if (outputUrl) {
+
+            modalOutputAudio.src =
+                outputUrl;
+
+            modalOutputAudio.load();
+
+        }
+
+
+        /* -----------------------------------------------------
+           SHOW MODAL
+        ----------------------------------------------------- */
+
+        modal.classList.remove(
+            "hidden"
+        );
+
+        modal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        document.body.classList.add(
+            "overflow-hidden"
+        );
+
+    }
+
+
+    /* =========================================================
+       CLOSE MODAL
+    ========================================================= */
+
+    function closeModal() {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+        modal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+        modalReferenceAudio.pause();
+
+        modalReferenceAudio.removeAttribute(
+            "src"
+        );
+
+        modalReferenceAudio.load();
+
+
+        modalOutputAudio.pause();
+
+        modalOutputAudio.removeAttribute(
+            "src"
+        );
+
+        modalOutputAudio.load();
+
+
+        document.body.classList.remove(
+            "overflow-hidden"
+        );
+
+    }
+
+
+    /* =========================================================
+       VIEW DETAILS BUTTONS
+    ========================================================= */
+
+    document
+        .querySelectorAll(
+            ".view-details-btn"
+        )
+        .forEach((button) => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    openModal(button);
+
+                }
+            );
+
+        });
+
+
+    /* =========================================================
+       CLOSE BUTTONS
+    ========================================================= */
+
+    closeButton.addEventListener(
+        "click",
+        closeModal
+    );
+
+    closeBottomButton.addEventListener(
+        "click",
+        closeModal
+    );
+
+    backdrop.addEventListener(
+        "click",
+        closeModal
+    );
+
+
+    /* =========================================================
+       ESCAPE KEY
+    ========================================================= */
+
+    document.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (
+                event.key === "Escape" &&
+                !modal.classList.contains(
+                    "hidden"
+                )
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+});
+
+</script>
 
 {% endblock %}

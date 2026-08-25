@@ -2,268 +2,909 @@
 
 {% block content %}
 
-<div class="flex flex-col gap-6">
+<style>
 
-    <!-- Header -->
+/* =========================================================
+   SPEAKER STUDIO
+========================================================= */
+
+.speaker-studio {
+    min-height: calc(100vh - 80px);
+    padding-top: 0;
+    padding-bottom: 2px;
+    margin-top: -18px;
+}
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.speaker-search {
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.speaker-search:focus {
+    border-color: rgb(99 102 241 / 0.8);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.08);
+    outline: none;
+}
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.speaker-tab {
+    transition: all 0.2s ease;
+}
+
+.speaker-tab:hover {
+    border-color: rgb(99 102 241 / 0.5);
+    background: rgb(15 23 42 / 0.7);
+}
+
+.speaker-tab.active {
+    border-color: rgb(99 102 241 / 0.7);
+    background: rgb(79 70 229 / 0.16);
+    color: rgb(199 210 254);
+    box-shadow: inset 0 0 0 1px rgb(99 102 241 / 0.08);
+}
+
+/* =========================================================
+   SPEAKER CARD
+========================================================= */
+
+.speaker-card {
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease,
+        box-shadow 0.2s ease;
+
+    min-height: 0;
+}
+
+.speaker-card:hover {
+    transform: translateY(-1px);
+    border-color: rgb(71 85 105);
+    background: rgb(15 23 42 / 0.65);
+    box-shadow: 0 8px 20px rgb(0 0 0 / 0.15);
+}
+
+.speaker-card.hidden {
+    display: none;
+}
+
+/* =========================================================
+   CREATE PANEL
+========================================================= */
+
+#create-speaker-panel {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================================
+   EMPTY STATES
+========================================================= */
+
+.speaker-empty {
+    min-height: 120px;
+}
+
+/* =========================================================
+   EMOTION BUTTONS
+========================================================= */
+
+.emotion-btn {
+    line-height: 1;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1024px) {
+
+    .speaker-card:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .speaker-studio {
+        min-height: auto;
+    }
+}
+/* =========================================================
+   CREATE SPEAKER PANEL
+   COMPACT + CENTERED
+========================================================= */
+
+#create-speaker-panel {
+    width: min(760px, 92vw);
+    margin: 0 auto;
+
+    /* Center horizontally */
+    align-self: center;
+
+    /* Keep the form compact */
+    padding: 14px;
+}
+
+/* Compact create form spacing */
+#create-speaker-panel form {
+    gap: 8px;
+}
+
+#create-speaker-panel input,
+#create-speaker-panel select {
+    min-height: 34px;
+}
+
+/* =========================================================
+   SPEAKER GRID
+   COMPACT 4-COLUMN LAYOUT
+========================================================= */
+
+#speaker-grid {
+    gap: 8px;
+}
+
+/* Compact speaker cards */
+.speaker-card {
+    padding: 10px;
+}
+
+/* Keep card content tight */
+.speaker-card .mt-2 {
+    margin-top: 6px;
+}
+
+/* Smaller emotion area */
+.speaker-card .emotion-btn {
+    padding: 4px 7px;
+    font-size: 8px;
+}
+
+/* Smaller audio player */
+.speaker-card audio {
+    height: 26px;
+    margin-top: 5px;
+}
+
+/* =========================================================
+   DESKTOP SCREEN
+   FIT 8 CARDS WITHOUT PAGE SCROLL
+========================================================= */
+
+@media (min-width: 1025px) and (min-height: 700px) {
+
+    .speaker-studio {
+        gap: 8px !important;
+    }
+
+    #speaker-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .speaker-card {
+        padding: 9px;
+    }
+
+    .speaker-card h3 {
+        font-size: 11px;
+    }
+
+    .speaker-card .line-clamp-2 {
+        font-size: 9px;
+        line-height: 1.25rem;
+    }
+
+    .speaker-card .emotion-btn {
+        padding: 3px 6px;
+        font-size: 8px;
+    }
+
+    .speaker-card audio {
+        height: 24px;
+    }
+}
+
+/* =========================================================
+   LARGE DESKTOP
+========================================================= */
+
+@media (min-width: 1280px) and (min-height: 800px) {
+
+    .speaker-studio {
+        gap: 7px !important;
+    }
+
+    #speaker-grid {
+        gap: 7px;
+    }
+
+    .speaker-card {
+        padding: 8px;
+    }
+}
+
+
+/* Remove unnecessary heading spacing */
+.speaker-studio h1 {
+    margin-top: 0 !important;
+    margin-bottom: 2px !important;
+}
+
+/* Compact text below heading */
+.speaker-studio h1 + p {
+    margin-top: 0 !important;
+    margin-bottom: 3px !important;
+}
+
+/* Reduce spacing between sections */
+.speaker-studio {
+    gap: 4px !important;
+}
+
+/* Bring tabs/content closer to heading */
+.speaker-tab {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Bring cards slightly closer to tabs */
+#speaker-grid {
+    margin-top: -4px !important;
+}
+</style>
+
+
+<div class="speaker-studio flex flex-col gap-3">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ===================================================== -->
 
     <div>
-        <h1 class="text-2xl font-semibold tracking-tight">
+        <h1 class="text-lg font-semibold tracking-tight">
             Speaker Studio
         </h1>
 
-        <p class="mt-2 text-sm text-slate-300">
-            Create reusable speaker profiles by uploading multiple emotion reference audios.
+        <p class="mt-0.5 text-[10px] text-slate-400">
+            Create reusable speaker profiles with emotion-aware reference audio.
         </p>
     </div>
 
-    <!-- Main Grid -->
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- =====================================================
+         SEARCH + ADD SPEAKER
+    ===================================================== -->
 
-        <!-- ===================================================== -->
-        <!-- LEFT PANEL -->
-        <!-- ===================================================== -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2">
 
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-6">
+        <!-- Search -->
 
-            <h2 class="text-lg font-semibold">
-                Create Speaker Profile
-            </h2>
+        <div class="relative w-full max-w-2xl">
 
-            <form
-                id="speaker-form"
-                class="mt-6 space-y-5"
-                enctype="multipart/form-data"
+            <svg
+                class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
             >
+
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
+                />
+
+            </svg>
+
+            <input
+                id="speaker-search"
+                type="text"
+                autocomplete="off"
+                placeholder="Search speakers by name..."
+                class="speaker-search w-full rounded-lg border border-slate-800 bg-slate-950/70 pl-10 pr-4 py-1.5 text-xs text-slate-200 placeholder:text-slate-500"
+            >
+
+        </div>
+
+
+        <!-- Add New Speaker -->
+
+        <button
+            type="button"
+            id="toggle-create-speaker"
+            class="shrink-0 rounded-lg bg-indigo-500 hover:bg-indigo-400 px-4 py-1.5 text-xs font-medium text-white transition shadow-md shadow-indigo-500/10"
+        >
+            + Add New Speaker
+        </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         SEARCH RESULT MESSAGE
+    ===================================================== -->
+
+    <div
+        id="search-result-message"
+        class="hidden rounded-lg border border-slate-800 bg-slate-900/30 px-3 py-2 text-center text-xs text-slate-400"
+    >
+        No matching speaker found.
+    </div>
+
+
+    <!-- =====================================================
+         CREATE SPEAKER PANEL
+         COMPACT VERSION
+    ===================================================== -->
+
+    <div
+        id="create-speaker-panel"
+        class="hidden fixed inset-0 z-40 items-center justify-center bg-black/60 px-4"
+    >
+        <div
+            class="w-full max-w-[760px] max-h-[90vh] overflow-y-auto rounded-xl border border-slate-800 bg-slate-900 p-4 shadow-2xl"
+        >
+
+        <!-- Header -->
+
+        <div class="flex items-center justify-between gap-3 mb-3">
+
+            <div>
+
+                <h2 class="text-base font-semibold">
+                    Create Speaker Profile
+                </h2>
+
+                <p class="mt-0.5 text-[10px] text-slate-500">
+                    Add speaker information and upload emotion reference audios.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="close-create-speaker"
+                class="shrink-0 text-slate-500 hover:text-white text-lg leading-none"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- =================================================
+             CREATE FORM
+        ================================================= -->
+
+        <form
+            id="speaker-form"
+            class="space-y-3"
+            enctype="multipart/form-data"
+        >
+
+            <!-- Speaker Information -->
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
                 <!-- Speaker Name -->
 
                 <div>
 
-                    <label class="text-xs text-slate-400">
+                    <label class="text-[11px] text-slate-400">
                         Speaker Name
                     </label>
 
                     <input
                         id="speaker-name"
                         type="text"
-                        class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+                        class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs"
                         placeholder="Enter speaker name"
                     >
 
                 </div>
 
-                <!-- Description -->
+
+                <!-- Gender -->
 
                 <div>
 
-                    <label class="text-xs text-slate-400">
-                        Description
-                    </label>
-
-                    <textarea
-                        id="speaker-description"
-                        rows="3"
-                        class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
-                        placeholder="Description"
-                    ></textarea>
-
-                </div>
-
-                <hr class="border-slate-800">
-
-                <!-- Add Emotion -->
-
-                <div>
-
-                    <h3 class="text-sm font-medium">
-                        Add Emotion
-                    </h3>
-
-                </div>
-
-                <!-- Emotion -->
-
-                <div>
-
-                    <label class="text-xs text-slate-400">
-                        Emotion
+                    <label class="text-[11px] text-slate-400">
+                        Gender
                     </label>
 
                     <select
-                        id="emotion"
-                        class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+                        id="speaker-gender"
+                        class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs"
                     >
-                        <option value="neutral">Neutral</option>
-                        <option value="calm">Calm</option>
-                        <option value="happy">Happy</option>
-                        <option value="sad">Sad</option>
-                        <option value="angry">Angry</option>
-                        <option value="fear">Fear</option>
-                        <option value="disgust">Disgust</option>
-                        <option value="surprise">Surprise</option>
+
+                        <option value="">
+                            Select gender
+                        </option>
+
+                        <option value="male">
+                            Male
+                        </option>
+
+                        <option value="female">
+                            Female
+                        </option>
+
+                        <option value="other">
+                            Other
+                        </option>
+
                     </select>
 
                 </div>
 
-                <!-- Audio -->
+
+                <!-- Description -->
 
                 <div>
 
-                    <label class="text-xs text-slate-400">
-                        Reference Audio
+                    <label class="text-[11px] text-slate-400">
+                        Description
                     </label>
 
                     <input
-                        id="emotion-audio"
-                        type="file"
-                        accept="audio/*"
-                        class="mt-1 w-full text-sm"
+                        id="speaker-description"
+                        type="text"
+                        class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs"
+                        placeholder="Short description"
                     >
 
                 </div>
 
-                <!-- Add Emotion Button -->
+            </div>
 
-                <button
-                    type="button"
-                    id="add-emotion-btn"
-                    class="w-full rounded-xl bg-indigo-500 hover:bg-indigo-400 py-2 text-sm font-medium"
-                >
-                    + Add Emotion
-                </button>
 
-                <!-- Emotion Queue -->
+            <!-- =================================================
+                 EMOTION SECTION
+            ================================================= -->
 
-                <div>
+            <div class="border-t border-slate-800 pt-3">
 
-                    <div class="text-sm font-medium">
-                        Emotions to Upload
+                <div class="flex items-center justify-between mb-2">
+
+                    <div>
+
+                        <h3 class="text-xs font-medium">
+                            Add Emotion Reference
+                        </h3>
+
+                        <p class="mt-0.5 text-[10px] text-slate-500">
+                            Add emotion-specific reference audios.
+                        </p>
+
                     </div>
+
+                    <span
+                        id="emotion-count"
+                        class="text-[10px] text-slate-500"
+                    >
+                        0 added
+                    </span>
+
+                </div>
+
+
+                <!-- Emotion + Audio + Add -->
+
+                <div class="grid grid-cols-1 md:grid-cols-[150px_1fr_auto] gap-2 items-end">
+
+                    <!-- Emotion -->
+
+                    <div>
+
+                        <label class="text-[10px] text-slate-400">
+                            Emotion
+                        </label>
+
+                        <select
+                            id="emotion"
+                            class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs"
+                        >
+
+                            <option value="neutral">
+                                Neutral
+                            </option>
+
+                            <option value="calm">
+                                Calm
+                            </option>
+
+                            <option value="happy">
+                                Happy
+                            </option>
+
+                            <option value="sad">
+                                Sad
+                            </option>
+
+                            <option value="angry">
+                                Angry
+                            </option>
+
+                            <option value="fear">
+                                Fear
+                            </option>
+
+                            <option value="disgust">
+                                Disgust
+                            </option>
+
+                            <option value="surprise">
+                                Surprise
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Audio -->
+
+                    <div>
+
+                        <label class="text-[10px] text-slate-400">
+                            Reference Audio
+                        </label>
+
+                        <input
+                            id="emotion-audio"
+                            type="file"
+                            accept="audio/*"
+                            class="mt-1 w-full text-xs text-slate-400"
+                        >
+
+                    </div>
+
+
+                    <!-- Add -->
+
+                    <button
+                        type="button"
+                        id="add-emotion-btn"
+                        class="rounded-lg bg-indigo-500 hover:bg-indigo-400 px-4 py-2 text-xs font-medium whitespace-nowrap"
+                    >
+                        + Add
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 EMOTION QUEUE
+            ================================================= -->
+
+            <div>
+
+                <div class="flex items-center justify-between mb-1.5">
+
+                    <span class="text-[10px] font-medium text-slate-300">
+                        Emotions to Upload
+                    </span>
+
+                </div>
+
+
+                <div
+                    id="emotion-list"
+                    class="grid grid-cols-1 md:grid-cols-2 gap-1.5"
+                >
 
                     <div
-                        id="emotion-list"
-                        class="mt-3 space-y-3"
+                        id="empty-message"
+                        class="md:col-span-2 rounded-lg border border-dashed border-slate-800 px-3 py-2 text-center text-[10px] text-slate-500"
                     >
-
-                        <div
-                            id="empty-message"
-                            class="rounded-xl border border-dashed border-slate-700 p-4 text-center text-xs text-slate-500"
-                        >
-                            No emotions added yet.
-                        </div>
-
+                        No emotions added yet.
                     </div>
 
                 </div>
 
-                <!-- Create Speaker -->
+            </div>
+
+
+            <!-- Create -->
+
+            <div class="flex justify-end pt-0.5">
 
                 <button
                     type="button"
                     id="create-speaker-btn"
-                    class="w-full rounded-xl bg-indigo-500 hover:bg-indigo-400 py-2 text-sm font-medium"
+                    class="rounded-lg bg-indigo-500 hover:bg-indigo-400 px-5 py-2 text-xs font-medium"
                 >
                     Create Speaker
                 </button>
 
-            </form>
+            </div>
 
+        </form>
+    </div>
+</div>
+
+
+    <!-- =====================================================
+     SPEAKER TABS + GENDER FILTER
+    ===================================================== -->
+
+    <div class="flex items-center justify-center gap-2">
+
+        <!-- Speaker Tabs -->
+        <div
+            id="speaker-tabs"
+            class="flex items-center justify-center gap-1.5"
+        >
+            <button
+                type="button"
+                class="speaker-tab active rounded-lg border border-slate-800 px-3 py-1.5 text-xs text-slate-300"
+                data-tab="all"
+            >
+                All Speakers
+            </button>
+
+            <button
+                type="button"
+                class="speaker-tab rounded-lg border border-slate-800 px-3 py-1.5 text-xs text-slate-300"
+                data-tab="system"
+            >
+                System Speakers
+            </button>
+
+            <button
+                type="button"
+                class="speaker-tab rounded-lg border border-slate-800 px-3 py-1.5 text-xs text-slate-300"
+                data-tab="mine"
+            >
+                My Speakers
+            </button>
         </div>
 
-        <!-- ===================================================== -->
-        <!-- RIGHT PANEL -->
-        <!-- ===================================================== -->
+        <!-- Gender Filter -->
+        <select
+            id="speaker-gender-filter"
+            class="speaker-gender-filter rounded-lg border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-slate-300 focus:border-indigo-500 focus:outline-none"
+        >
+            <option value="all">
+                All Genders
+            </option>
+            <option value="male">
+                Male
+            </option>
+            <option value="female">
+                Female
+            </option>
+            <option value="other">
+                Other
+            </option>
+        </select>
 
-       <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-6">
+    </div>
 
-    <div class="flex items-center justify-between">
+    <!-- =====================================================
+         SPEAKER COUNT
+    ===================================================== -->
 
-        <h2 class="text-lg font-semibold">
-            Available Speakers
-        </h2>
+    <div class="flex items-center justify-between px-1">
 
-        <div class="text-xs text-slate-400">
-            {{ speakers|length }} Speaker(s)
+        <div
+            id="speaker-section-title"
+            class="text-[10px] font-medium text-slate-500 uppercase tracking-wider"
+        >
+            All Speakers
+        </div>
+
+        <div class="text-[10px] text-slate-500">
+            {{ speakers|length }} total
         </div>
 
     </div>
 
-    <div class="mt-5 space-y-4">
+
+    <!-- =====================================================
+         SPEAKER GRID
+         4 COLUMNS ON DESKTOP
+         COMPACT CARDS = 2 ROWS VISIBLE
+    ===================================================== -->
+
+    <div
+        id="speaker-grid"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
+    >
 
         {% if speakers %}
 
             {% for speaker in speakers %}
 
-            <div class="rounded-xl border border-slate-800 bg-slate-950/40 p-4">
+            <div
+                class="speaker-card rounded-xl border border-slate-800 bg-slate-950/35 p-3"
+                data-speaker-name="{{ speaker.name|lower }}"
+                data-speaker-source="{{ speaker.source }}"
+                data-speaker-owner="{{ speaker.user_id or '' }}"
+                data-speaker-gender="{{ speaker.gender or '' }}"
+            >
 
-                <!-- Speaker Header -->
+                <!-- HEADER -->
 
-                <div class="flex justify-between items-start gap-4">
+                <div class="flex items-start justify-between gap-2">
 
-                    <div>
+                    <div class="min-w-0">
 
-                        <div class="font-medium">
-
+                        <h3 class="font-semibold text-xs text-slate-100 truncate">
                             {{ speaker.name }}
+                        </h3>
 
-                        </div>
+                        <!-- Badge -->
 
-                        <div class="text-xs text-slate-400 mt-1">
+                        <div class="mt-1">
 
-                            {{ speaker.description or "No description" }}
+                            {% if speaker.source == "system" %}
+
+                                <span
+                                    class="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-1.5 py-0.5 text-[8px] font-medium tracking-wide text-slate-400"
+                                >
+                                    SYSTEM
+                                </span>
+
+                            {% else %}
+
+                                <span
+                                    class="inline-flex items-center rounded-full border border-indigo-700/60 bg-indigo-500/10 px-1.5 py-0.5 text-[8px] font-medium tracking-wide text-indigo-300"
+                                >
+                                    MY SPEAKER
+                                </span>
+
+                            {% endif %}
 
                         </div>
 
                     </div>
 
-                    <form
-                        action="/ui/speakers/delete"
-                        method="post"
-                    >
 
-                        <input
-                            type="hidden"
-                            name="speaker_id"
-                            value="{{ speaker.id }}"
-                        >
+                    <!-- ACTIONS -->
 
-                        <button
-                            class="text-xs px-3 py-1.5 rounded-lg border border-red-700 text-red-300 hover:bg-red-900/30"
-                            type="submit"
-                        >
-                            Delete
-                        </button>
+                    {% if speaker.source == "user" and speaker.user_id == current_user.id %}
 
-                    </form>
+                        <div class="flex items-center gap-1 shrink-0">
+
+                            <button
+                                type="button"
+                                class="edit-speaker-btn rounded-md border border-slate-800 px-1.5 py-0.5 text-[9px] text-slate-400 hover:border-indigo-700 hover:text-indigo-300 transition"
+                                data-id="{{ speaker.id }}"
+                                data-name="{{ speaker.name }}"
+                                data-gender="{{ speaker.gender or '' }}"
+                                data-description="{{ speaker.description or '' }}"
+                            >
+                                Edit
+                            </button>
+
+                            <form
+                                action="/ui/speakers/delete"
+                                method="post"
+                                onsubmit="return confirm('Delete this speaker and all its emotion audios?');"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="speaker_id"
+                                    value="{{ speaker.id }}"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="rounded-md border border-slate-800 px-1.5 py-0.5 text-[9px] text-slate-500 hover:border-red-700 hover:text-red-300 transition"
+                                >
+                                    Delete
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    {% endif %}
 
                 </div>
 
-                <!-- Emotions -->
 
-                <div class="mt-4">
+                <!-- DESCRIPTION -->
 
-                    <div class="text-xs text-slate-400 mb-2">
+                <div class="mt-2 min-h-[32px]">
 
-                        Available Emotions
+                    <p class="text-[10px] leading-4 text-slate-400 line-clamp-2">
+                        {{ speaker.description or "No description available." }}
+                    </p>
+
+                </div>
+
+
+                <!-- GENDER -->
+
+                {% if speaker.gender %}
+
+                    <div class="mt-1 text-[9px] text-slate-500">
+
+                        Gender:
+
+                        <span class="text-slate-300">
+
+                            {% if speaker.gender == "male" %}
+
+                                Male
+
+                            {% elif speaker.gender == "female" %}
+
+                                Female
+
+                            {% elif speaker.gender == "other" %}
+
+                                Other
+
+                            {% elif speaker.gender == "prefer_not_to_say" %}
+
+                                Prefer not to say
+
+                            {% else %}
+
+                                {{ speaker.gender }}
+
+                            {% endif %}
+
+                        </span>
 
                     </div>
 
-                    <div class="flex flex-wrap gap-2">
+                {% endif %}
 
-                        {% set found = false %}
+
+                <!-- EMOTIONS -->
+
+                <div class="mt-2">
+
+                    <div class="mb-1 text-[8px] uppercase tracking-wide text-slate-500">
+                        Available Emotions
+                    </div>
+
+
+                    <div class="flex flex-wrap gap-1">
 
                         {% for emotion in speaker_emotions %}
 
                             {% if emotion.speaker_id == speaker.id %}
 
-                                {% set found = true %}
-
                                 <button
                                     type="button"
-                                    class="emotion-btn px-3 py-1 rounded-lg text-xs bg-indigo-500/20 border border-indigo-500/40 hover:bg-indigo-500/30"
+                                    class="emotion-btn rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-1 text-[9px] text-indigo-200 hover:bg-indigo-500/20 transition"
                                     data-speaker="{{ speaker.id }}"
+                                    data-emotion-id="{{ emotion.id }}"
+                                    data-emotion="{{ emotion.emotion }}"
                                     data-url="{{ emotion.public_url }}"
+                                    data-source="{{ emotion.source }}"
+                                    data-owner="{{ emotion.user_id or '' }}"
                                 >
                                     {{ emotion.emotion }}
                                 </button>
@@ -272,13 +913,17 @@
 
                         {% endfor %}
 
-
                     </div>
+
+
+                    <!-- Audio Player -->
+
                     <audio
                         id="player-{{ speaker.id }}"
                         controls
-                        class="hidden w-full mt-4"
+                        class="hidden w-full mt-2 h-7"
                     ></audio>
+
                 </div>
 
             </div>
@@ -287,11 +932,19 @@
 
         {% else %}
 
-            <div class="rounded-xl border border-dashed border-slate-700 p-8 text-center">
+            <div
+                class="speaker-empty col-span-full rounded-xl border border-dashed border-slate-800 flex items-center justify-center"
+            >
 
-                <div class="text-slate-500">
+                <div class="text-center">
 
-                    No speakers created yet.
+                    <div class="text-xs text-slate-400">
+                        No speakers created yet.
+                    </div>
+
+                    <div class="mt-1 text-[10px] text-slate-600">
+                        Add a new speaker profile to get started.
+                    </div>
 
                 </div>
 
@@ -303,18 +956,259 @@
 
 </div>
 
+
+<!-- ==========================================================
+     EDIT SPEAKER MODAL
+========================================================== -->
+
+<div
+    id="edit-speaker-modal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+>
+
+    <div
+        class="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-2xl"
+    >
+
+        <!-- Header -->
+
+        <div class="flex items-center justify-between">
+
+            <div>
+
+                <h2 class="text-base font-semibold">
+                    Edit Speaker
+                </h2>
+
+                <p class="mt-1 text-[10px] text-slate-400">
+                    Update speaker information or replace an emotion audio.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="close-edit-modal"
+                class="text-slate-400 hover:text-white text-xl"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- Form -->
+
+        <form
+            id="edit-speaker-form"
+            action="/ui/speakers/update"
+            method="post"
+            enctype="multipart/form-data"
+            class="mt-5 space-y-3"
+        >
+
+            <input
+                type="hidden"
+                id="edit-speaker-id"
+                name="speaker_id"
+            >
+
+
+            <!-- Name -->
+
+            <div>
+
+                <label class="text-[11px] text-slate-400">
+                    Speaker Name
+                </label>
+
+                <input
+                    id="edit-speaker-name"
+                    name="speaker_name"
+                    type="text"
+                    required
+                    class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs"
+                >
+
+            </div>
+
+
+            <!-- Gender -->
+
+            <div>
+
+                <label class="text-[11px] text-slate-400">
+                    Gender
+                </label>
+
+                <select
+                    id="edit-speaker-gender"
+                    name="gender"
+                    class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs"
+                >
+
+                    <option value="">
+                        Select gender
+                    </option>
+
+                    <option value="male">
+                        Male
+                    </option>
+
+                    <option value="female">
+                        Female
+                    </option>
+
+                    <option value="other">
+                        Other
+                    </option>
+
+                    <option value="prefer_not_to_say">
+                        Prefer not to say
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Description -->
+
+            <div>
+
+                <label class="text-[11px] text-slate-400">
+                    Description
+                </label>
+
+                <textarea
+                    id="edit-speaker-description"
+                    name="description"
+                    rows="2"
+                    class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs resize-none"
+                ></textarea>
+
+            </div>
+
+
+            <hr class="border-slate-800">
+
+
+            <!-- Replace Emotion -->
+
+            <div>
+
+                <h3 class="text-xs font-medium">
+                    Replace Emotion Audio
+                </h3>
+
+                <p class="mt-1 text-[10px] text-slate-500">
+                    Select an existing emotion and upload a new reference audio.
+                </p>
+
+            </div>
+
+
+            <!-- Emotion -->
+
+            <div>
+
+                <label class="text-[11px] text-slate-400">
+                    Emotion
+                </label>
+
+                <select
+                    id="edit-emotion-id"
+                    name="emotion_id"
+                    class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-xs"
+                >
+
+                    <option value="">
+                        Don't replace audio
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- Audio -->
+
+            <div>
+
+                <label class="text-[11px] text-slate-400">
+                    New Reference Audio
+                </label>
+
+                <input
+                    id="edit-emotion-audio"
+                    name="sample"
+                    type="file"
+                    accept="audio/*"
+                    class="mt-1 w-full text-xs"
+                >
+
+                <p class="mt-1 text-[10px] text-slate-500">
+                    Leave empty if you only want to edit speaker information.
+                </p>
+
+            </div>
+
+
+            <!-- Buttons -->
+
+            <div class="flex justify-end gap-2 pt-1">
+
+                <button
+                    type="button"
+                    id="cancel-edit"
+                    class="rounded-lg border border-slate-700 px-4 py-2 text-xs hover:bg-slate-800"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="rounded-lg bg-indigo-500 hover:bg-indigo-400 px-4 py-2 text-xs font-medium"
+                >
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
 
 </div>
+
+
 <script>
+
+/* ==========================================================
+   CREATE SPEAKER
+========================================================== */
 
 const emotions = [];
 
-const addBtn = document.getElementById("add-emotion-btn");
-const saveBtn = document.getElementById("create-speaker-btn");
+const addBtn =
+    document.getElementById("add-emotion-btn");
 
-const emotionList = document.getElementById("emotion-list");
-const emptyMessage = document.getElementById("empty-message");
+const saveBtn =
+    document.getElementById("create-speaker-btn");
+
+const emotionList =
+    document.getElementById("emotion-list");
+
+const emptyMessage =
+    document.getElementById("empty-message");
+
+const emotionCount =
+    document.getElementById("emotion-count");
+
+
+/* ----------------------------------------------------------
+   Add emotion
+---------------------------------------------------------- */
 
 addBtn.addEventListener("click", () => {
 
@@ -324,17 +1218,39 @@ addBtn.addEventListener("click", () => {
     const fileInput =
         document.getElementById("emotion-audio");
 
-    const file = fileInput.files[0];
+    const file =
+        fileInput.files[0];
+
 
     if (!file) {
+
         alert("Select an audio first.");
+
         return;
     }
+
+
+    /* Prevent duplicate emotion */
+
+    if (
+        emotions.some(
+            item => item.emotion === emotion
+        )
+    ) {
+
+        alert(
+            `The ${emotion} emotion has already been added.`
+        );
+
+        return;
+    }
+
 
     emotions.push({
         emotion,
         file
     });
+
 
     renderEmotionList();
 
@@ -342,9 +1258,18 @@ addBtn.addEventListener("click", () => {
 
 });
 
+
+/* ----------------------------------------------------------
+   Render emotion list
+---------------------------------------------------------- */
+
 function renderEmotionList() {
 
     emotionList.innerHTML = "";
+
+    emotionCount.textContent =
+        `${emotions.length} added`;
+
 
     if (emotions.length === 0) {
 
@@ -353,28 +1278,42 @@ function renderEmotionList() {
         return;
     }
 
+
     emotions.forEach((item, index) => {
 
-        const row = document.createElement("div");
+        const row =
+            document.createElement("div");
+
 
         row.className =
-            "flex items-center justify-between rounded-lg border border-slate-700 px-3 py-2";
+            "flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950/40 px-2.5 py-1.5";
+
 
         row.innerHTML = `
-            <div class="text-sm">
-                <strong>${item.emotion}</strong>
-                <span class="text-slate-400 ml-2">
+
+            <div class="min-w-0">
+
+                <span class="text-[10px] font-medium text-slate-200">
+                    ${item.emotion}
+                </span>
+
+                <span class="text-[9px] text-slate-500 ml-1.5 truncate">
                     ${item.file.name}
                 </span>
+
             </div>
 
+
             <button
-                class="text-red-400 text-xs"
+                type="button"
+                class="text-red-400 hover:text-red-300 text-[9px] ml-2 shrink-0"
                 onclick="removeEmotion(${index})"
             >
                 Remove
             </button>
+
         `;
+
 
         emotionList.appendChild(row);
 
@@ -382,75 +1321,114 @@ function renderEmotionList() {
 
 }
 
-function removeEmotion(index){
 
-    emotions.splice(index,1);
+/* ----------------------------------------------------------
+   Remove emotion
+---------------------------------------------------------- */
+
+function removeEmotion(index) {
+
+    emotions.splice(index, 1);
 
     renderEmotionList();
 
 }
 
-saveBtn.addEventListener("click", async ()=>{
 
-    if(emotions.length===0){
+/* ==========================================================
+   CREATE SPEAKER SUBMIT
+========================================================== */
+
+saveBtn.addEventListener("click", async () => {
+
+    if (emotions.length === 0) {
 
         alert("Please add at least one emotion.");
 
         return;
-
     }
 
+
     const speakerName =
-        document.getElementById("speaker-name").value;
+        document
+            .getElementById("speaker-name")
+            .value
+            .trim();
+
+
+    const gender =
+        document
+            .getElementById("speaker-gender")
+            .value;
+
 
     const description =
-        document.getElementById("speaker-description").value;
+        document
+            .getElementById("speaker-description")
+            .value
+            .trim();
 
-    if(!speakerName){
+
+    if (!speakerName) {
 
         alert("Speaker name required.");
 
         return;
-
     }
+
 
     TTSDAI.showLoader();
 
-    try{
 
-        for(const item of emotions){
+    try {
 
-            const formData = new FormData();
+        for (const item of emotions) {
+
+            const formData =
+                new FormData();
+
 
             formData.append(
                 "speaker_name",
                 speakerName
             );
 
+
+            formData.append(
+                "gender",
+                gender
+            );
+
+
             formData.append(
                 "description",
                 description
             );
+
 
             formData.append(
                 "emotion",
                 item.emotion
             );
 
+
             formData.append(
                 "sample",
                 item.file
             );
 
-            const response = await fetch(
-                "/ui/speakers/upload",
-                {
-                    method:"POST",
-                    body:formData
-                }
-            );
 
-            if(!response.ok){
+            const response =
+                await fetch(
+                    "/ui/speakers/upload",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+            if (!response.ok) {
 
                 throw new Error(
                     "Upload failed."
@@ -460,86 +1438,768 @@ saveBtn.addEventListener("click", async ()=>{
 
         }
 
+
         location.reload();
 
     }
 
-    catch(err){
+    catch (err) {
 
-        alert(err);
+        alert(
+            err.message || err
+        );
 
         TTSDAI.hideLoader();
 
     }
 
 });
-document.querySelectorAll(".emotion-btn").forEach(button => {
 
-    button.addEventListener("click", () => {
 
-        const speakerId = button.dataset.speaker;
-        const url = button.dataset.url;
+/* ==========================================================
+   ADD NEW SPEAKER PANEL
+========================================================== */
 
-        /* ------------------------------------------ */
-        /* Reset all emotions for this speaker       */
-        /* ------------------------------------------ */
+const createPanel =
+    document.getElementById(
+        "create-speaker-panel"
+    );
 
-        document
-            .querySelectorAll(
-                `.emotion-btn[data-speaker="${speakerId}"]`
-            )
-            .forEach(btn => {
+const openCreateBtn =
+    document.getElementById(
+        "toggle-create-speaker"
+    );
 
-                btn.classList.remove(
+const closeCreateBtn =
+    document.getElementById(
+        "close-create-speaker"
+    );
+
+
+openCreateBtn.addEventListener(
+    "click",
+    () => {
+
+        createPanel.classList.remove("hidden");
+
+        createPanel.classList.add("flex");
+    }
+);
+
+
+closeCreateBtn.addEventListener(
+    "click",
+    () => {
+
+        createPanel.classList.add("hidden");
+
+        createPanel.classList.remove("flex");
+    }
+);
+
+
+/* ==========================================================
+   SPEAKER TABS
+========================================================== */
+
+const tabs =
+    document.querySelectorAll(
+        ".speaker-tab"
+    );
+
+const speakerCards =
+    document.querySelectorAll(
+        ".speaker-card"
+    );
+
+const speakerGrid =
+    document.getElementById(
+        "speaker-grid"
+    );
+
+const searchInput =
+    document.getElementById(
+        "speaker-search"
+    );
+
+const searchMessage =
+    document.getElementById(
+        "search-result-message"
+    );
+
+const sectionTitle =
+    document.getElementById(
+        "speaker-section-title"
+    );
+const genderFilter =
+    document.getElementById(
+        "speaker-gender-filter"
+    );
+
+/*
+   All Speakers is selected by default.
+*/
+
+let activeTab = "all";
+
+
+/* ----------------------------------------------------------
+   Update tab appearance
+---------------------------------------------------------- */
+
+function updateTabAppearance() {
+
+    tabs.forEach(tab => {
+
+        const isActive =
+            tab.dataset.tab === activeTab;
+
+
+        tab.classList.toggle(
+            "active",
+            isActive
+        );
+
+    });
+
+
+    const activeButton =
+        document.querySelector(
+            `.speaker-tab[data-tab="${activeTab}"]`
+        );
+
+
+    if (activeButton) {
+
+        sectionTitle.textContent =
+            activeButton.textContent.trim();
+
+    }
+
+    else {
+
+        sectionTitle.textContent =
+            "";
+
+    }
+
+}
+
+
+/* ----------------------------------------------------------
+   Filter speakers
+---------------------------------------------------------- */
+
+function applyTabFilter() {
+
+    const query =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+    const selectedGender =
+        genderFilter.value;
+
+    let visibleCount = 0;
+
+    /* ========================================================
+       SEARCH MODE
+       Search ALWAYS across ALL speakers.
+       The currently selected tab is ignored.
+       Gender filter is still applied.
+    ======================================================== */
+
+    if (query !== "") {
+
+        speakerCards.forEach(card => {
+
+            const name =
+                card.dataset.speakerName
+                    .trim()
+                    .toLowerCase();
+
+            const gender =
+                card.dataset.speakerGender
+                    .trim()
+                    .toLowerCase();
+
+            const matchesSearch =
+                name.includes(query);
+
+            const matchesGender =
+                selectedGender === "all" ||
+                gender === selectedGender;
+
+            const shouldShow =
+                matchesSearch &&
+                matchesGender;
+
+            card.classList.toggle(
+                "hidden",
+                !shouldShow
+            );
+
+            if (shouldShow) {
+                visibleCount++;
+            }
+        });
+
+        /* ----------------------------------------------------
+           Search result message
+        ---------------------------------------------------- */
+
+        if (visibleCount === 0) {
+            searchMessage.classList.remove(
+                "hidden"
+            );
+        }
+        else {
+            searchMessage.classList.add(
+                "hidden"
+            );
+        }
+
+        return;
+    }
+
+    /* ========================================================
+       NORMAL TAB MODE
+       Tab + Gender filter work together.
+    ======================================================== */
+
+    searchMessage.classList.add(
+        "hidden"
+    );
+
+    /* --------------------------------------------------------
+       No active tab → hide everything
+    -------------------------------------------------------- */
+
+    if (!activeTab) {
+
+        speakerCards.forEach(card => {
+            card.classList.add("hidden");
+        });
+
+        return;
+    }
+
+    /* --------------------------------------------------------
+       Apply selected tab + gender
+    -------------------------------------------------------- */
+
+    speakerCards.forEach(card => {
+
+        const source =
+            card.dataset.speakerSource;
+
+        const gender =
+            card.dataset.speakerGender
+                .trim()
+                .toLowerCase();
+
+        let matchesTab = false;
+
+        if (activeTab === "all") {
+
+            matchesTab = true;
+
+        }
+        else if (activeTab === "system") {
+
+            matchesTab =
+                source === "system";
+
+        }
+        else if (activeTab === "mine") {
+
+            matchesTab =
+                source === "user";
+        }
+
+        const matchesGender =
+            selectedGender === "all" ||
+            gender === selectedGender;
+
+        const shouldShow =
+            matchesTab &&
+            matchesGender;
+
+        card.classList.toggle(
+            "hidden",
+            !shouldShow
+        );
+
+        if (shouldShow) {
+            visibleCount++;
+        }
+    });
+}
+/* ----------------------------------------------------------
+   Tab click
+---------------------------------------------------------- */
+
+tabs.forEach(tab => {
+
+    tab.addEventListener(
+        "click",
+        () => {
+
+            const clickedTab =
+                tab.dataset.tab;
+
+
+            /*
+               Clicking currently active tab
+               closes it.
+            */
+
+            if (
+                activeTab === clickedTab
+            ) {
+
+                activeTab = null;
+
+            }
+
+            else {
+
+                /*
+                   Clicking another tab automatically
+                   closes previous tab.
+                */
+
+                activeTab = clickedTab;
+
+            }
+
+
+            updateTabAppearance();
+
+            applyTabFilter();
+
+        }
+    );
+
+});
+
+
+/* ==========================================================
+   SEARCH
+========================================================== */
+
+searchInput.addEventListener(
+    "input",
+    () => {
+
+        applyTabFilter();
+
+    }
+);
+genderFilter.addEventListener(
+    "change",
+    () => {
+        applyTabFilter();
+    }
+);
+
+/*
+   Pressing Escape clears search.
+*/
+
+searchInput.addEventListener(
+    "keydown",
+    event => {
+
+        if (event.key === "Escape") {
+
+            searchInput.value = "";
+
+            applyTabFilter();
+
+            searchInput.blur();
+
+        }
+
+    }
+);
+
+
+/* ==========================================================
+   EMOTION AUDIO PLAYERS
+========================================================== */
+
+document
+    .querySelectorAll(".emotion-btn")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const speakerId =
+                    button.dataset.speaker;
+
+                const url =
+                    button.dataset.url;
+
+
+                /*
+                   Reset buttons for this speaker
+                */
+
+                document
+                    .querySelectorAll(
+                        `.emotion-btn[data-speaker="${speakerId}"]`
+                    )
+                    .forEach(btn => {
+
+                        btn.classList.remove(
+                            "bg-indigo-500",
+                            "text-white",
+                            "border-indigo-400"
+                        );
+
+
+                        btn.classList.add(
+                            "bg-indigo-500/10",
+                            "border-indigo-500/30"
+                        );
+
+                    });
+
+
+                /*
+                   Highlight selected
+                */
+
+                button.classList.remove(
+                    "bg-indigo-500/10",
+                    "border-indigo-500/30"
+                );
+
+
+                button.classList.add(
                     "bg-indigo-500",
                     "text-white",
                     "border-indigo-400"
                 );
 
-                btn.classList.add(
-                    "bg-indigo-500/20",
-                    "border-indigo-500/40"
+
+                /*
+                   Play audio
+                */
+
+                const player =
+                    document.getElementById(
+                        `player-${speakerId}`
+                    );
+
+
+                player.pause();
+
+                player.src = url;
+
+                player.classList.remove(
+                    "hidden"
                 );
 
-            });
+                player.load();
 
+                player.play();
 
-        /* ------------------------------------------ */
-        /* Highlight selected emotion                */
-        /* ------------------------------------------ */
-
-        button.classList.remove(
-            "bg-indigo-500/20",
-            "border-indigo-500/40"
+            }
         );
-
-        button.classList.add(
-            "bg-indigo-500",
-            "text-white",
-            "border-indigo-400"
-        );
-
-
-        /* ------------------------------------------ */
-        /* Play selected audio                      */
-        /* ------------------------------------------ */
-
-        const player = document.getElementById(
-            `player-${speakerId}`
-        );
-
-        player.pause();
-
-        player.src = url;
-
-        player.classList.remove("hidden");
-
-        player.load();
-
-        player.play();
 
     });
 
-});
+
+/* ==========================================================
+   EDIT SPEAKER MODAL
+========================================================== */
+
+const editModal =
+    document.getElementById(
+        "edit-speaker-modal"
+    );
+
+
+const closeEditModal =
+    document.getElementById(
+        "close-edit-modal"
+    );
+
+
+const cancelEdit =
+    document.getElementById(
+        "cancel-edit"
+    );
+
+
+const editSpeakerId =
+    document.getElementById(
+        "edit-speaker-id"
+    );
+
+
+const editSpeakerName =
+    document.getElementById(
+        "edit-speaker-name"
+    );
+
+
+const editSpeakerDescription =
+    document.getElementById(
+        "edit-speaker-description"
+    );
+
+
+const editSpeakerGender =
+    document.getElementById(
+        "edit-speaker-gender"
+    );
+
+
+const editEmotionSelect =
+    document.getElementById(
+        "edit-emotion-id"
+    );
+
+
+const editAudioInput =
+    document.getElementById(
+        "edit-emotion-audio"
+    );
+
+
+/* ----------------------------------------------------------
+   Open modal
+---------------------------------------------------------- */
+
+document
+    .querySelectorAll(".edit-speaker-btn")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const speakerId =
+                    button.dataset.id;
+
+
+                const speakerName =
+                    button.dataset.name;
+
+
+                const gender =
+                    button.dataset.gender || "";
+
+
+                const description =
+                    button.dataset.description || "";
+
+
+                editSpeakerId.value =
+                    speakerId;
+
+
+                editSpeakerName.value =
+                    speakerName;
+
+
+                editSpeakerGender.value =
+                    gender;
+
+
+                editSpeakerDescription.value =
+                    description;
+
+
+                /*
+                   Reset emotion dropdown
+                */
+
+                editEmotionSelect.innerHTML = `
+
+                    <option value="">
+                        Don't replace audio
+                    </option>
+
+                `;
+
+
+                /*
+                   Add only current user's
+                   emotion audios
+                */
+
+                document
+                    .querySelectorAll(
+                        `.emotion-btn[data-speaker="${speakerId}"]`
+                    )
+                    .forEach(emotionButton => {
+
+                        if (
+                            emotionButton.dataset.source !== "user" ||
+                            emotionButton.dataset.owner !== "{{ current_user.id }}"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const option =
+                            document.createElement(
+                                "option"
+                            );
+
+
+                        option.value =
+                            emotionButton.dataset.emotionId;
+
+
+                        option.textContent =
+                            emotionButton.dataset.emotion;
+
+
+                        editEmotionSelect.appendChild(
+                            option
+                        );
+
+                    });
+
+
+                editAudioInput.value = "";
+
+
+                editModal.classList.remove(
+                    "hidden"
+                );
+
+            }
+        );
+
+    });
+
+
+/* ----------------------------------------------------------
+   Close modal
+---------------------------------------------------------- */
+
+function closeEditModalWindow() {
+
+    editModal.classList.add(
+        "hidden"
+    );
+
+}
+
+
+closeEditModal.addEventListener(
+    "click",
+    closeEditModalWindow
+);
+
+
+cancelEdit.addEventListener(
+    "click",
+    closeEditModalWindow
+);
+
+
+/* ----------------------------------------------------------
+   Click outside modal
+---------------------------------------------------------- */
+
+editModal.addEventListener(
+    "click",
+    event => {
+
+        if (
+            event.target === editModal
+        ) {
+
+            closeEditModalWindow();
+
+        }
+
+    }
+);
+
+
+/* ----------------------------------------------------------
+   Escape key
+---------------------------------------------------------- */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape" &&
+            !editModal.classList.contains("hidden")
+        ) {
+
+            closeEditModalWindow();
+
+        }
+
+    }
+);
+
+
+/* ----------------------------------------------------------
+   Validate edit form
+---------------------------------------------------------- */
+
+document
+    .getElementById("edit-speaker-form")
+    .addEventListener(
+        "submit",
+        event => {
+
+            const emotionId =
+                editEmotionSelect.value;
+
+
+            const audioFile =
+                editAudioInput.files[0];
+
+
+            if (
+                emotionId &&
+                !audioFile
+            ) {
+
+                event.preventDefault();
+
+
+                alert(
+                    "Please select a new audio file for the selected emotion."
+                );
+
+                return;
+
+            }
+
+        }
+    );
+
+
+/* ==========================================================
+   INITIAL PAGE STATE
+========================================================== */
+
+/*
+   All Speakers is OPEN by default.
+*/
+
+updateTabAppearance();
+
+applyTabFilter();
+
 </script>
+
 {% endblock %}

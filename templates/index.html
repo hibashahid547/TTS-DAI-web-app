@@ -1,53 +1,351 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="md:col-span-2">
-      <h1 class="text-3xl font-semibold tracking-tight">Marketing Voiceover Studio</h1>
-      <p class="mt-2 text-slate-300 leading-relaxed">
-        Create reference-based voices and generate human-like voiceovers with natural pacing.
-        Latency is not optimized; quality is prioritized.
-      </p>
 
-      <div class="mt-6 flex flex-wrap gap-3">
-        <a href="/ui/tts" class="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-sm font-medium">Open TTS Studio</a>
-        <a href="/ui/speakers" class="px-4 py-2 rounded-xl border border-slate-800 hover:bg-slate-900 text-sm font-medium">Manage Speakers</a>
-      </div>
+<div class="flex flex-col gap-5">
 
-      <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
-          <div class="text-sm font-medium">Speakers Studio</div>
-          <div class="mt-2 text-sm text-slate-300">Upload MP3/WAV samples, normalize, and save curated brand voices.</div>
-          <div class="mt-4">
-            <a href="/ui/speakers" class="text-sm text-indigo-300 hover:text-indigo-200">Go to Speakers Studio →</a>
-          </div>
+    <!-- ========================================= -->
+    <!-- DASHBOARD HEADER -->
+    <!-- ========================================= -->
+
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
+
+        <div>
+            <h1 class="text-2xl font-semibold tracking-tight">
+                Marketing Voiceover Studio
+            </h1>
+
+            <p class="mt-1 text-sm text-slate-400 max-w-2xl">
+                Create reference-based voices and generate natural, human-like
+                voiceovers with your saved speaker profiles.
+            </p>
         </div>
-        <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
-          <div class="text-sm font-medium">TTS Studio</div>
-          <div class="mt-2 text-sm text-slate-300">Generate MP3 voiceovers with punctuation-aware pauses and export instantly.</div>
-          <div class="mt-4">
-            <a href="/ui/tts" class="text-sm text-indigo-300 hover:text-indigo-200">Go to TTS Studio →</a>
-          </div>
+
+        <div class="flex flex-wrap gap-2">
+
+            <a
+                href="/ui/tts"
+                class="px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400
+                       text-xs font-medium transition"
+            >
+                Open TTS Studio
+            </a>
+
+            <a
+                href="/ui/speakers"
+                class="px-3.5 py-2 rounded-xl border border-slate-800
+                       hover:bg-slate-900 text-xs font-medium transition"
+            >
+                Manage Speakers
+            </a>
+
         </div>
-      </div>
+
     </div>
 
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/30 p-5">
-      <div class="text-sm font-medium">Quick Tips</div>
-      <div class="mt-3 space-y-3 text-sm text-slate-300">
-        <div>
-          <div class="font-medium text-slate-200">Reference clip</div>
-          <div>6–15s, dry studio recording, no music/echo. WAV preferred.</div>
+
+    <!-- ========================================= -->
+    <!-- STAT CARDS -->
+    <!-- ========================================= -->
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+        <!-- Available Speakers -->
+
+        <div
+            class="rounded-2xl border border-slate-800
+                   bg-slate-900/30 p-4
+                   hover:border-slate-700 transition"
+        >
+
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <div class="text-xs text-slate-400">
+                        Available Speakers
+                    </div>
+
+                    <div class="mt-1 text-2xl font-semibold tracking-tight">
+                        {{ speaker_count }}
+                    </div>
+                </div>
+
+                <div
+                    class="h-10 w-10 rounded-xl
+                           bg-indigo-500/10
+                           border border-indigo-500/20
+                           flex items-center justify-center"
+                >
+                    <svg
+                        class="w-5 h-5 text-indigo-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
+                            d="M15 19a4 4 0 00-8 0m4-8a3 3 0 100-6 3 3 0 000 6zm8 8a4 4 0 00-3-3.87M17 5.13a3 3 0 010 5.74"
+                        />
+                    </svg>
+                </div>
+
+            </div>
+
+            <div class="mt-3 text-[11px] text-slate-500">
+                Saved speaker profiles available for voice generation.
+            </div>
+
         </div>
-        <div>
-          <div class="font-medium text-slate-200">Script formatting</div>
-          <div>Use punctuation and line breaks. Shorter sentences sound more human.</div>
+
+
+        <!-- Total Generations -->
+
+        <div
+            class="rounded-2xl border border-slate-800
+                   bg-slate-900/30 p-4
+                   hover:border-slate-700 transition"
+        >
+
+            <div class="flex items-center justify-between">
+
+                <div>
+                    <div class="text-xs text-slate-400">
+                        Total Generations
+                    </div>
+
+                    <div class="mt-1 text-2xl font-semibold tracking-tight">
+                        {{ generation_count }}
+                    </div>
+                </div>
+
+                <div
+                    class="h-10 w-10 rounded-xl
+                           bg-emerald-500/10
+                           border border-emerald-500/20
+                           flex items-center justify-center"
+                >
+                    <svg
+                        class="w-5 h-5 text-emerald-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.8"
+                            d="M9 19V6l12-3v13M9 19a3 3 0 11-6 0 3 3 0 016 0zm12-3a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                    </svg>
+                </div>
+
+            </div>
+
+            <div class="mt-3 text-[11px] text-slate-500">
+                Voice generations recorded in your generation history.
+            </div>
+
         </div>
-        <div>
-          <div class="font-medium text-slate-200">Pacing</div>
-          <div>Use the pause controls to avoid “single-breath” output.</div>
-        </div>
-      </div>
+
     </div>
-  </div>
+
+
+    <!-- ========================================= -->
+    <!-- MAIN DASHBOARD CONTENT -->
+    <!-- ========================================= -->
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+
+
+        <!-- ========================================= -->
+        <!-- STUDIO CARDS -->
+        <!-- ========================================= -->
+
+        <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+            <!-- Speakers Studio -->
+
+            <div
+                class="rounded-2xl border border-slate-800
+                       bg-slate-900/30 p-4
+                       hover:border-slate-700 transition"
+            >
+
+                <div class="flex items-start justify-between gap-3">
+
+                    <div>
+                        <div class="text-sm font-medium">
+                            Speakers Studio
+                        </div>
+
+                        <p class="mt-1.5 text-xs leading-relaxed text-slate-400">
+                            Create and manage reference-based speaker profiles
+                            with multiple emotion samples.
+                        </p>
+                    </div>
+
+                    <div
+                        class="shrink-0 h-8 w-8 rounded-lg
+                               bg-slate-800/70
+                               flex items-center justify-center"
+                    >
+                        <svg
+                            class="w-4 h-4 text-slate-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.8"
+                                d="M12 14a4 4 0 100-8 4 4 0 000 8zm-7 6a7 7 0 0114 0"
+                            />
+                        </svg>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+
+                    <a
+                        href="/ui/speakers"
+                        class="text-xs text-indigo-300 hover:text-indigo-200 transition"
+                    >
+                        Go to Speakers Studio →
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- TTS Studio -->
+
+            <div
+                class="rounded-2xl border border-slate-800
+                       bg-slate-900/30 p-4
+                       hover:border-slate-700 transition"
+            >
+
+                <div class="flex items-start justify-between gap-3">
+
+                    <div>
+                        <div class="text-sm font-medium">
+                            TTS Studio
+                        </div>
+
+                        <p class="mt-1.5 text-xs leading-relaxed text-slate-400">
+                            Generate high-quality voiceovers using your saved
+                            speakers, emotions, languages and speed settings.
+                        </p>
+                    </div>
+
+                    <div
+                        class="shrink-0 h-8 w-8 rounded-lg
+                               bg-slate-800/70
+                               flex items-center justify-center"
+                    >
+                        <svg
+                            class="w-4 h-4 text-slate-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.8"
+                                d="M9 19V6l12-3v13M9 19a3 3 0 11-6 0 3 3 0 016 0zm12-3a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                        </svg>
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+
+                    <a
+                        href="/ui/tts"
+                        class="text-xs text-indigo-300 hover:text-indigo-200 transition"
+                    >
+                        Go to TTS Studio →
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- QUICK TIPS -->
+        <!-- ========================================= -->
+
+        <div
+            class="rounded-2xl border border-slate-800
+                   bg-slate-900/30 p-4"
+        >
+
+            <div class="flex items-center justify-between">
+
+                <div class="text-sm font-medium">
+                    Quick Tips
+                </div>
+
+                <span class="text-[10px] text-slate-500">
+                    Best results
+                </span>
+
+            </div>
+
+
+            <div class="mt-3 space-y-3">
+
+                <div>
+                    <div class="text-xs font-medium text-slate-200">
+                        Reference clip
+                    </div>
+
+                    <div class="mt-0.5 text-[11px] leading-relaxed text-slate-400">
+                        Use a 6–15s clean recording without music or echo.
+                        WAV is preferred.
+                    </div>
+                </div>
+
+
+                <div>
+                    <div class="text-xs font-medium text-slate-200">
+                        Script formatting
+                    </div>
+
+                    <div class="mt-0.5 text-[11px] leading-relaxed text-slate-400">
+                        Use punctuation and shorter sentences for more natural
+                        pacing.
+                    </div>
+                </div>
+
+
+                <div>
+                    <div class="text-xs font-medium text-slate-200">
+                        Pacing
+                    </div>
+
+                    <div class="mt-0.5 text-[11px] leading-relaxed text-slate-400">
+                        Adjust speaking speed and pauses to avoid
+                        single-breath output.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
 {% endblock %}

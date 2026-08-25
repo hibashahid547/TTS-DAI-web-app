@@ -125,6 +125,30 @@ class DataApi:
             return data
         raise ApiError(f"Unexpected upsert response for {table}: {data!r}")
 
+    def update(
+        self,
+        table: str,
+        data: JsonDict,
+        *,
+        filters: Dict[str, str],
+    ) -> JsonDict:
+        result = self._request(
+           "PATCH",
+           f"/{table}",
+           params=filters,
+           json=data,
+           extra_headers={"Prefer": "return=representation"},
+        )
+        if isinstance(result, list):
+            if not result:
+                raise ApiError(f"Update on {table} returned no rows")
+            return result[0]
+
+        if isinstance(result, dict):
+            return result
+
+        raise ApiError(f"Unexpected update response for {table}: {result!r}")
+
     def delete(self, table: str, *, filters: Dict[str, str]) -> None:
         self._request(
             "DELETE",

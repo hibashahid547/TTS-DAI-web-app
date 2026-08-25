@@ -2,41 +2,43 @@
 
 {% block content %}
 
-<div class="flex flex-col gap-6">
+<div class="flex flex-col gap-2">
 
     <!-- =============================== -->
     <!-- Header -->
     <!-- =============================== -->
 
     <div>
-
-        <h1 class="text-2xl font-semibold tracking-tight">
+        <h1 class="text-base font-semibold tracking-tight">
             TTS Studio
         </h1>
 
-        <p class="mt-2 text-sm text-slate-300">
+        <p class="mt-0.5 text-[11px] text-slate-400">
             Generate high-quality speech using your saved speaker profiles.
         </p>
-
     </div>
+
 
     <!-- =============================== -->
     <!-- Main Grid -->
     <!-- =============================== -->
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-2">
 
         <!-- ========================================= -->
         <!-- LEFT PANEL -->
         <!-- ========================================= -->
 
-        <div class="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/30 p-6">
+        <div class="lg:col-span-2 rounded-2xl border border-slate-800 bg-slate-900/30 p-2.5">
 
-            <h2 class="text-lg font-semibold">
+            <h2 class="text-sm font-semibold">
                 Voice Generation
             </h2>
 
-            <div class="mt-6">
+
+            <!-- Text -->
+
+            <div class="mt-2">
 
                 <label class="text-xs text-slate-400">
                     Enter Text
@@ -44,34 +46,32 @@
 
                 <textarea
                     id="tts-text"
-                    rows="14"
-                    class="mt-2 w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3 text-sm resize-none"
+                    rows="4"
+                    class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-1.5 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     placeholder="Type the text you want to convert into speech..."
                 ></textarea>
 
-                <div
-                    class="mt-2 text-right text-xs text-slate-500"
-                >
+                <div class="mt-0.5 text-right text-[10px] text-slate-500">
                     <span id="char-count">0</span> characters
                 </div>
 
             </div>
+
+
             <!-- Language -->
 
-            <div>
+            <div class="mt-1.5">
 
                 <label class="text-xs text-slate-400">
-                   Language
+                    Language
                 </label>
 
                 <select
                     id="language"
                     name="language"
-                    class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+                    class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-2.5 py-1.5 text-xs"
                 >
-
                     <option value="">Original Language</option>
-
                     <option value="English">English</option>
                     <option value="Arabic">Arabic</option>
                     <option value="Danish">Danish</option>
@@ -95,33 +95,39 @@
                     <option value="Swahili">Swahili</option>
                     <option value="Turkish">Turkish</option>
                     <option value="Chinese">Chinese</option>
-
                 </select>
 
             </div>
+
+
             <!-- Translate -->
 
-            <div class="flex items-center gap-3">
+            <div class="mt-1.5 flex items-center gap-1.5">
 
                 <input
-                  id="translate-first"
-                  name="translate_first"
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-slate-700 bg-slate-950 text-indigo-500"
-                > 
+                    id="translate-first"
+                    name="translate_first"
+                    type="checkbox"
+                    class="h-3.5 w-3.5 rounded border-slate-700 bg-slate-950 text-indigo-500"
+                >
 
                 <label
-                  for="translate-first"
-                  class="text-sm text-slate-300"
+                    for="translate-first"
+                    class="text-xs text-slate-300"
                 >
-                  Translate text before generating audio
+                    Translate text before generating audio
                 </label>
 
             </div>
+
+
+            <!-- Translation -->
+
             <div
                 id="translation-container"
-                class="hidden mt-4"
+                class="hidden mt-2"
             >
+
                 <label
                     for="translated-text"
                     class="text-xs text-slate-400"
@@ -132,82 +138,86 @@
                 <textarea
                     id="translated-text"
                     name="translated_text"
-                    rows="7"
-                    class="mt-2 w-full rounded-xl bg-slate-950 border border-slate-800 px-4 py-3 text-sm text-slate-100 placeholder-slate-600 resize-y focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    rows="2"
+                    class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-1.5 text-xs text-slate-100 placeholder-slate-600 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     placeholder="Translated text will appear here..."
                 ></textarea>
 
                 <div
                     id="translation-status"
-                    class="mt-3 text-sm text-slate-400"
+                    class="mt-1 text-xs text-slate-400"
                 ></div>
+
             </div>
-            <div class="mt-6">
+
+
+            <!-- Generate -->
+
+            <div class="mt-2">
 
                 <button
                     id="generate-btn"
-                    class="w-full rounded-xl bg-indigo-500 hover:bg-indigo-400 py-3 text-sm font-medium transition"
+                    class="w-full rounded-xl bg-indigo-500 hover:bg-indigo-400 py-1.5 text-xs font-medium transition"
                 >
                     Generate Speech
                 </button>
 
             </div>
 
-            <hr class="my-6 border-slate-800">
+
+            <hr class="my-2 border-slate-800">
+
 
             <!-- Audio Section -->
 
             <div id="result-section" class="hidden">
 
-                <div class="text-sm font-medium">
-
+                <div class="text-xs font-medium">
                     Generated Audio
-
                 </div>
 
                 <audio
                     id="audio-player"
                     controls
-                    class="mt-4 w-full"
-                >
-                </audio>
+                    class="mt-1.5 w-full h-8"
+                ></audio>
 
-                <button
-                    type="button"
+                <a
                     id="download-btn"
+                    href="#"
                     download="voiceover.mp3"
-                    class="mt-4 w-full rounded-xl bg-indigo-500 hover:bg-indigo-400 py-3 text-sm font-medium transition"
+                    class="mt-1.5 w-full rounded-xl bg-indigo-500 hover:bg-indigo-400 py-1.5 text-xs font-medium transition text-center block"
                 >
                     Download MP3
-                </button>
+                </a>
 
             </div>
 
         </div>
 
+
         <!-- ========================================= -->
         <!-- RIGHT PANEL -->
         <!-- ========================================= -->
 
-        <div class="lg:col-span-1 rounded-2xl border border-slate-800 bg-slate-900/30 p-6">
+        <div class="lg:col-span-1 rounded-2xl border border-slate-800 bg-slate-900/30 p-2.5">
 
-            <h2 class="text-lg font-semibold">
+            <h2 class="text-sm font-semibold">
                 Generation Settings
             </h2>
 
+
             <!-- Speaker -->
 
-            <div class="mt-6">
+            <div class="mt-1.5">
 
                 <label class="text-xs text-slate-400">
-
                     Speaker
-
                 </label>
 
                 <select
                     id="speaker"
-                    class="mt-2 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
+                    class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-2.5 py-1.5 text-sm"
                 >
 
                     {% for speaker in speakers %}
@@ -222,34 +232,31 @@
 
             </div>
 
+
             <!-- Emotion -->
 
-            <div class="mt-5">
+            <div class="mt-1.5">
 
                 <label class="text-xs text-slate-400">
-
                     Emotion
-
                 </label>
 
                 <select
                     id="emotion"
-                    class="mt-2 w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-sm"
-                >
-                </select>
+                    class="mt-1 w-full rounded-xl bg-slate-950 border border-slate-800 px-2.5 py-1.5 text-sm"
+                ></select>
 
             </div>
 
+
             <!-- Speed -->
 
-            <div class="mt-6">
+            <div class="mt-2.5">
 
                 <div class="flex justify-between">
 
                     <label class="text-xs text-slate-400">
-
                         Speaking Speed
-
                     </label>
 
                     <span
@@ -268,30 +275,28 @@
                     max="2.0"
                     step="0.25"
                     value="1.0"
-                    class="mt-3 w-full accent-indigo-500"
+                    class="mt-1 w-full accent-indigo-500"
                 >
 
             </div>
 
-            <hr class="my-6 border-slate-800">
+
+            <hr class="my-2 border-slate-800">
+
 
             <!-- Speaker Info -->
 
             <div>
 
-                <div class="text-sm font-medium">
-
+                <div class="text-xs font-medium">
                     Speaker Information
-
                 </div>
 
                 <div
                     id="speaker-info"
-                    class="mt-4 rounded-xl border border-slate-800 bg-slate-950/50 p-4 text-sm text-slate-300"
+                    class="mt-1.5 rounded-xl border border-slate-800 bg-slate-950/50 p-2.5 text-[11px] text-slate-300"
                 >
-
                     Select a speaker to view details.
-
                 </div>
 
             </div>
@@ -301,30 +306,39 @@
     </div>
 
 </div>
+
+
 <script>
 
 const speakers = {{ speakers | tojson }};
 const speakerEmotions = {{ speaker_emotions | tojson }};
+
 const speakerSelect = document.getElementById("speaker");
 const emotionSelect = document.getElementById("emotion");
 const speakerInfo = document.getElementById("speaker-info");
+
 const speedSlider = document.getElementById("speed");
 const speedValue = document.getElementById("speed-value");
+
 const textArea = document.getElementById("tts-text");
 const charCount = document.getElementById("char-count");
+
 const translateCheckbox = document.getElementById("translate-first");
 const translationContainer = document.getElementById("translation-container");
 const translatedText = document.getElementById("translated-text");
 const translationStatus = document.getElementById("translation-status");
+
 const generateBtn = document.getElementById("generate-btn");
+
 const resultSection = document.getElementById("result-section");
 const audioPlayer = document.getElementById("audio-player");
 const downloadBtn = document.getElementById("download-btn");
 
 
-/* ------------------------------------------ */
-/* Character Counter                          */
-/* ------------------------------------------ */
+
+/* ------------------------------------------
+   Character Counter
+------------------------------------------ */
 
 textArea.addEventListener("input", ()=>{
 
@@ -333,9 +347,10 @@ textArea.addEventListener("input", ()=>{
 });
 
 
-/* ------------------------------------------ */
-/* Speed Slider                               */
-/* ------------------------------------------ */
+
+/* ------------------------------------------
+   Speed Slider
+------------------------------------------ */
 
 speedSlider.addEventListener("input", ()=>{
 
@@ -345,9 +360,10 @@ speedSlider.addEventListener("input", ()=>{
 });
 
 
-/* ------------------------------------------ */
-/* Populate Emotion Dropdown                  */
-/* ------------------------------------------ */
+
+/* ------------------------------------------
+   Populate Emotion Dropdown
+------------------------------------------ */
 
 function loadEmotions(){
 
@@ -359,9 +375,7 @@ function loadEmotions(){
         );
 
     if(!speaker){
-
         return;
-
     }
 
     const emotions =
@@ -375,7 +389,6 @@ function loadEmotions(){
             document.createElement("option");
 
         option.value = e.emotion;
-
         option.textContent = e.emotion;
 
         emotionSelect.appendChild(option);
@@ -385,21 +398,21 @@ function loadEmotions(){
 }
 
 
-/* ------------------------------------------ */
-/* Speaker Info                               */
-/* ------------------------------------------ */
+
+/* ------------------------------------------
+   Speaker Info
+------------------------------------------ */
 
 function updateSpeakerInfo(){
 
     const speaker =
         speakers.find(
-            s=>s.name===speakerSelect.value
+            s => s.name === speakerSelect.value
         );
 
     if(!speaker){
 
-        speakerInfo.innerHTML="";
-
+        speakerInfo.innerHTML = "";
         return;
 
     }
@@ -407,10 +420,10 @@ function updateSpeakerInfo(){
     const emotions =
         speakerEmotions
         .filter(
-            e=>e.speaker_id===speaker.id
+            e => e.speaker_id === speaker.id
         )
         .map(
-            e=>e.emotion
+            e => e.emotion
         );
 
     speakerInfo.innerHTML = `
@@ -419,39 +432,35 @@ function updateSpeakerInfo(){
 
             <strong>Name</strong>
 
-            <div class="mt-1">
-
+            <div class="mt-0.5">
                 ${speaker.name}
-
             </div>
 
         </div>
 
-        <div class="mt-4">
+        <div class="mt-2">
 
             <strong>Description</strong>
 
-            <div class="mt-1">
-
+            <div class="mt-0.5">
                 ${speaker.description || "No description"}
-
             </div>
 
         </div>
 
-        <div class="mt-4">
+        <div class="mt-2">
 
             <strong>Available Emotions</strong>
 
-            <div class="mt-2 flex flex-wrap gap-2">
+            <div class="mt-1.5 flex flex-wrap gap-1.5">
 
                 ${
                     emotions.map(e=>`
 
-                        <span class="px-2 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-xs">
-
+                        <span
+                            class="px-1.5 py-0.5 rounded-lg bg-indigo-500/20 border border-indigo-500/30 text-[11px]"
+                        >
                             ${e}
-
                         </span>
 
                     `).join("")
@@ -464,78 +473,90 @@ function updateSpeakerInfo(){
     `;
 
 }
-
-
-/* ------------------------------------------ */
-/* Initial Load                               */
-/* ------------------------------------------ */
+/* ------------------------------------------
+   Initial Load
+------------------------------------------ */
 
 loadEmotions();
-
 updateSpeakerInfo();
 
-speakerSelect.addEventListener("change",()=>{
+speakerSelect.addEventListener("change", ()=>{
 
     loadEmotions();
-
     updateSpeakerInfo();
 
 });
 
 
-/* ------------------------------------------ */
-/* Generate Speech                            */
-/* ------------------------------------------ */
+
+/* ------------------------------------------
+   Generate Speech
+------------------------------------------ */
 
 generateBtn.addEventListener("click", async () => {
 
-    const originalText = textArea.value.trim();
+    const originalText =
+        textArea.value.trim();
 
-    // Check whether translation is enabled
     const isTranslationEnabled =
         translateCheckbox.checked;
 
-    // ----------------------------------------
-    // Validate original text
-    // ----------------------------------------
+
+    /* Validate original text */
 
     if (!originalText) {
+
         alert("Please enter text.");
         return;
+
     }
 
-    // ----------------------------------------
-    // Decide which text goes to Chatterbox
-    // ----------------------------------------
+
+    /* Decide which text goes to Chatterbox */
 
     let textForTTS = originalText;
 
     if (isTranslationEnabled) {
 
-        textForTTS = translatedText.value.trim();
+        textForTTS =
+            translatedText.value.trim();
 
         if (!textForTTS) {
+
             alert("Translated text is empty.");
             return;
+
         }
+
     }
 
-    // ----------------------------------------
-    // Show loader
-    // ----------------------------------------
+
+    /* Show loader */
 
     TTSDAI.showLoader();
 
+
     try {
 
-        const formData = new FormData();
+        const formData =
+            new FormData();
 
-        // IMPORTANT:
-        // If translation is enabled, this is the
-        // editable translated text.
+
         formData.append(
             "text",
             textForTTS
+        );
+
+        formData.append(
+            "original_text",
+            originalText
+        );
+
+        formData.append(
+            "translated_text",
+            isTranslationEnabled
+                ? textForTTS
+                : ""
         );
 
         formData.append(
@@ -558,8 +579,6 @@ generateBtn.addEventListener("click", async () => {
             document.getElementById("language").value
         );
 
-        // Translation has already happened.
-        // Do NOT translate again in the backend.
         formData.append(
             "translate_first",
             "false"
@@ -570,84 +589,59 @@ generateBtn.addEventListener("click", async () => {
             "voiceover.mp3"
         );
 
-        // ----------------------------------------
-        // Call Generate Speech API
-        // ----------------------------------------
 
-        const response = await fetch(
-            "/ui/tts/generate",
-            {
-                method: "POST",
-                body: formData
-            }
-        );
+        /* Call Generate Speech API */
 
-        const data = await response.json();
+        const response =
+            await fetch(
+                "/ui/tts/generate",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+
+        const data =
+            await response.json();
+
 
         if (!response.ok) {
 
             throw new Error(
-                data.detail || "Generation failed."
+                data.detail ||
+                "Generation failed."
             );
+
         }
 
-        // ----------------------------------------
-        // Show generated audio
-        // ----------------------------------------
+
+        /* Show generated audio */
 
         resultSection.classList.remove("hidden");
 
-        audioPlayer.src = data.public_url;
+        audioPlayer.src =
+            data.public_url;
+
         audioPlayer.load();
 
-        // ----------------------------------------
-        // Download button
-        // ----------------------------------------
 
-        downloadBtn.removeAttribute("href");
+        /* Download button */
 
-        downloadBtn.onclick = async (e) => {
+        downloadBtn.href =
+            `/ui/tts/download/${data.id}`;
 
-            e.preventDefault();
+        downloadBtn.download =
+            data.filename;
 
-            try {
-
-                const response = await fetch(
-                    data.public_url
-                );
-
-                const blob = await response.blob();
-
-                const url =
-                    window.URL.createObjectURL(blob);
-
-                const a =
-                    document.createElement("a");
-
-                a.href = url;
-                a.download = data.filename;
-
-                document.body.appendChild(a);
-
-                a.click();
-
-                document.body.removeChild(a);
-
-                window.URL.revokeObjectURL(url);
-
-            } catch (err) {
-
-                alert("Unable to download audio.");
-
-            }
-        };
 
     } catch (err) {
 
         console.error(err);
 
         alert(
-            err.message || "Generation failed."
+            err.message ||
+            "Generation failed."
         );
 
     } finally {
@@ -655,99 +649,153 @@ generateBtn.addEventListener("click", async () => {
         TTSDAI.hideLoader();
 
     }
+
 });
 
-translateCheckbox.addEventListener("change", async function () {
 
-    // ----------------------------------------
-    // Checkbox unchecked
-    // ----------------------------------------
 
-    if (!this.checked) {
-        translationContainer.classList.add("hidden");
-        translatedText.value = "";
-        translationStatus.textContent = "";
-        return;
-    }
+/* ------------------------------------------
+   Translation
+------------------------------------------ */
 
-    // ----------------------------------------
-    // Checkbox checked
-    // ----------------------------------------
+translateCheckbox.addEventListener(
+    "change",
+    async function () {
 
-    const text = textArea.value.trim();
+        /* Checkbox unchecked */
 
-    const language = document.getElementById("language").value;
+        if (!this.checked) {
 
-    if (!text) {
+            translationContainer
+                .classList
+                .add("hidden");
 
-        this.checked = false;
+            translatedText.value = "";
+            translationStatus.textContent = "";
 
-        alert("Please enter text before enabling translation.");
+            return;
 
-        return;
-    }
-
-    if (!language) {
-
-        this.checked = false;
-
-        alert("Please select a language before enabling translation.");
-
-        return;
-    }
-    translationContainer.classList.remove("hidden");
-
-    translationStatus.textContent = "Translating...";
-    translatedText.value = "";
-
-    try {
-
-        const formData = new FormData();
-
-        formData.append("text", text);
-        formData.append("language", language);
-
-        const response = await fetch(
-            "/ui/tts/translate",
-            {
-                method: "POST",
-                body: formData
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(
-                data.detail || "Translation failed."
-            );
         }
 
-        translatedText.value = data.translated_text;
+
+        /* Checkbox checked */
+
+        const text =
+            textArea.value.trim();
+
+        const language =
+            document
+                .getElementById("language")
+                .value;
+
+
+        if (!text) {
+
+            this.checked = false;
+
+            alert(
+                "Please enter text before enabling translation."
+            );
+
+            return;
+
+        }
+
+
+        if (!language) {
+
+            this.checked = false;
+
+            alert(
+                "Please select a language before enabling translation."
+            );
+
+            return;
+
+        }
+
+
+        translationContainer
+            .classList
+            .remove("hidden");
 
         translationStatus.textContent =
-            "Translation completed. You can edit it before generating speech.";
+            "Translating...";
 
-        translationStatus.className =
-            "mt-3 text-sm text-emerald-400";
-
-    } catch (error) {
-
-        console.error("Translation error:", error);
-
-        translationStatus.textContent =
-            "Translation failed.";
-
-        translationStatus.className =
-            "mt-3 text-sm text-red-400";
         translatedText.value = "";
 
-    }
 
-});
+        try {
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "text",
+                text
+            );
+
+            formData.append(
+                "language",
+                language
+            );
+
+
+            const response =
+                await fetch(
+                    "/ui/tts/translate",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    "Translation failed."
+                );
+
+            }
+
+
+            translatedText.value =
+                data.translated_text;
+
+
+            translationStatus.textContent =
+                "Translation completed. You can edit it before generating speech.";
+
+            translationStatus.className =
+                "mt-1 text-xs text-emerald-400";
+
+
+        } catch (error) {
+
+            console.error(
+                "Translation error:",
+                error
+            );
+
+            translationStatus.textContent =
+                "Translation failed.";
+
+            translationStatus.className =
+                "mt-1 text-xs text-red-400";
+
+            translatedText.value = "";
+
+        }
+
+    }
+);
+
 </script>
 
 {% endblock %}
-
-
-
