@@ -22,7 +22,7 @@ RUN apt-get update \
 
 # CUDA PyTorch wheels (requires NVIDIA Container Toolkit + compatible host driver)
 RUN pip install --upgrade pip \
-    && pip install --index-url https://download.pytorch.org/whl/cu124 \
+    && pip install --index-url https://download.pytorch.org/whl/cpu \
         torch==2.6.0 \
         torchaudio==2.6.0
 

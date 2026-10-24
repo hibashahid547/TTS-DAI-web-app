@@ -6,9 +6,8 @@ services:
     ports:
       - "${PORT:-8965}:8965"
     environment:
-      TTS_DEVICE: ${TTS_DEVICE:-cuda}
+      TTS_DEVICE: ${TTS_DEVICE:-cpu}
       PORT: ${PORT:-8965}
-      NVIDIA_VISIBLE_DEVICES: all
       HF_HOME: /cache/huggingface
       TRANSFORMERS_CACHE: /cache/huggingface
       HUGGINGFACE_HUB_CACHE: /cache/huggingface
@@ -17,7 +16,6 @@ services:
     volumes:
       - tts_model_cache:/cache
       - ./voices:/app/voices
-    gpus: all
     restart: unless-stopped
 
 volumes:
